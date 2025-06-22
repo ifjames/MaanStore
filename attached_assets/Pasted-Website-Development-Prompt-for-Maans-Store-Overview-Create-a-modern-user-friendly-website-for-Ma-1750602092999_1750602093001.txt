@@ -1,0 +1,123 @@
+Website Development Prompt for Maans' Store
+Overview
+Create a modern, user-friendly website for Maans' Store, a small grocery store, using Vite with React for the frontend and Firebase (Firestore and Authentication) for the database and auth. The website should feature a secure admin authentication system, display inventory details (item names, prices, and stock levels) sourced from a Google Sheet and stored in Firestore, and include a dashboard highlighting low-stock items.
+Requirements
+1. General
+
+Use Tailwind CSS for a modern, clean, and friendly UI/UX.
+Deployable on Firebase Hosting.
+Fully responsive for mobile, tablet, and desktop.
+Implement secure APIs and data handling practices.
+
+2. Authentication
+
+Admin Login:
+Secure login system using Firebase Authentication (email/password).
+Only admins can log in to view and manage inventory.
+Redirect unauthenticated users to the login page.
+Include a logout button.
+Password reset functionality via email.
+
+
+
+3. Inventory Management
+
+Data Source:
+Read inventory data (item names, prices, stock levels) from a Google Sheet using Google Sheets API.
+Sync data to Firestore for real-time database storage.
+Support periodic sync (e.g., daily or on-demand via admin action).
+
+
+Firestore Structure:
+Collection: inventory
+Documents: Each item with fields itemName (string), price (number), stock (number).
+
+
+Display:
+Public page: Show a read-only table of items with columns for Item Name, Price, and Stock.
+Admin page: Same table but with an option to manually trigger Google Sheet sync.
+
+
+Validation:
+Ensure prices are non-negative numbers.
+Ensure stock levels are non-negative integers.
+Handle missing or invalid data gracefully (e.g., display "N/A").
+
+
+
+4. Dashboard
+
+Admin Dashboard:
+Display a section for low-stock items (e.g., stock ≤ 10 units).
+Show a card or table with item names and stock levels for low-stock items.
+Include a summary (e.g., total items, total stock).
+Use visual indicators (e.g., red badges for low stock).
+
+
+Navigation:
+Sidebar or top navbar with links to Dashboard, Inventory, and Logout.
+Highlight the active page in the navigation.
+
+
+
+5. UI/UX
+
+Theme: Clean, modern, and friendly.
+Primary colors: Soft green (#4CAF50), white (#FFFFFF), and neutral gray (#F5F5F5).
+Accents: Light blue (#2196F3) for buttons/links.
+Font: Use Google Fonts (e.g., Roboto or Poppins) for readability.
+
+
+Components:
+Login page: Centered form with email, password, and "Forgot Password?" link.
+Inventory table: Sortable by item name or price, searchable by item name.
+Dashboard: Grid layout for low-stock alerts and summary stats.
+Buttons: Rounded, hover effects (e.g., scale or color change).
+
+
+Accessibility:
+Use semantic HTML.
+Ensure keyboard navigation and screen reader compatibility.
+High-contrast text and buttons.
+
+
+
+6. Technical Details
+
+Vite Setup:
+Use Vite with React plugin for fast development and optimized builds.
+Project structure:
+src/: React components, pages, and utilities.
+src/pages/: Login, Dashboard, Inventory pages.
+src/components/: Reusable components (e.g., Navbar, InventoryTable).
+src/lib/: Firebase and Google Sheets API utilities.
+
+
+Use Vite’s ES modules and modern JavaScript syntax.
+Configure Tailwind CSS via postcss.config.js and tailwind.config.js.
+
+
+Firebase Integration:
+Use Firebase SDK for Authentication and Firestore.
+Configure Vite environment variables (VITE_FIREBASE_*) for Firebase config.
+
+
+Error Handling:
+Display user-friendly error messages (e.g., "Failed to load inventory. Please try again.").
+Log errors to console for debugging.
+
+
+Performance:
+Lazy-load inventory data using React’s Suspense and lazy.
+Optimize Firestore queries to minimize reads.
+Leverage Vite’s code-splitting for faster page loads.
+
+
+
+Notes
+
+Google Sheet Format: Assume a sheet with columns Item Name, Price, Stock starting at row 2 (row 1 is headers).
+Low Stock Threshold: Configurable in code (default: ≤ 10 units).
+Firebase Setup: Provide placeholder Firebase config; user must replace with their own.
+Testing: Ensure inventory sync works with sample Google Sheet data.
+Future Scalability: Design Firestore schema to allow future additions (e.g., categories, images).
