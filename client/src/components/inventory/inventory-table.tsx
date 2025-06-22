@@ -1,6 +1,8 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Package, AlertTriangle, CheckCircle } from "lucide-react";
+import { formatCurrency } from "@/lib/notifications";
+import { motion } from "framer-motion";
 
 interface InventoryItem {
   id: number;
@@ -93,8 +95,8 @@ export default function InventoryTable({ inventory, isLoading }: InventoryTableP
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {item.itemName}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ${parseFloat(item.price).toFixed(2)}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        {formatCurrency(item.price, localStorage.getItem('currency') || 'PHP')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {item.stock}

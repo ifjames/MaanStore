@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { RefreshCw, Package, Warehouse, AlertTriangle, DollarSign } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+import { showNotification, formatCurrency } from "@/lib/notifications";
+import { motion } from "framer-motion";
 
 export default function Dashboard() {
   const queryClient = useQueryClient();
@@ -28,17 +29,10 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/inventory"] });
       queryClient.invalidateQueries({ queryKey: ["/api/inventory/stats"] });
       queryClient.invalidateQueries({ queryKey: ["/api/inventory/low-stock"] });
-      toast({
-        title: "Sync successful",
-        description: `Updated ${data.itemCount} items from Google Sheets`,
-      });
+      showNotification.success("Sync successful", `Updated ${data.itemCount} items from Google Sheets`);
     },
     onError: (error: Error) => {
-      toast({
-        title: "Sync failed",
-        description: error.message || "Failed to sync inventory data",
-        variant: "destructive",
-      });
+      showNotification.error("Sync failed", error.message || "Failed to sync inventory data");
     },
   });
 
@@ -65,51 +59,68 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto p-6">
+    <div className="flex-1 overflow-y-auto mobile-padding py-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="mt-1 text-sm text-gray-500">Monitor your store's inventory and performance</p>
-        </div>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
+          <h1 className="text-3xl font-bold text-gradient">Dashboard</h1>
+          <p className="mt-1 text-muted-foreground mobile-text">Monitor your store's inventory and performance</p>
+        </motion.div>
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <StatsCard
-            title="Total Items"
-            value={stats?.totalItems || 0}
-            icon={Package}
-            color="primary"
-          />
-          <StatsCard
-            title="Total Stock"
-            value={stats?.totalStock || 0}
-            icon={Warehouse}
-            color="secondary"
-          />
-          <StatsCard
-            title="Low Stock Items"
-            value={stats?.lowStockCount || 0}
-            icon={AlertTriangle}
-            color="danger"
-          />
-          <StatsCard
-            title="Inventory Value"
-            value={`$${stats?.totalValue?.toFixed(2) || '0.00'}`}
-            icon={DollarSign}
-            color="accent"
-          />
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+            <StatsCard
+              title="Total Items"
+              value={(stats as any)?.totalItems || 0}
+              icon={Package}
+              color="primary"
+            />
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+            <StatsCard
+              title="Total Stock"
+              value={(stats as any)?.totalStock || 0}
+              icon={Warehouse}
+              color="secondary"
+            />
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+            <StatsCard
+              title="Low Stock Items"
+              value={(stats as any)?.lowStockCount || 0}
+              icon={AlertTriangle}
+              color="danger"
+            />
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+            <StatsCard
+              title="Inventory Value"
+              value={formatCurrency((stats as any)?.totalValue || 0, localStorage.getItem('currency') || 'PHP')}
+              icon={DollarSign}
+              color="accent"
+            />
+          </motion.div>
         </div>
 
         {/* Low Stock Alerts */}
-        <div className="store-card mb-8">
-          <div className="px-6 py-4 border-b border-gray-200">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="store-card mb-8"
+        >
+          <div className="px-6 py-4 border-b border-border/50">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <AlertTriangle className="text-[#F44336] mr-2" size={20} />
-                <h3 className="text-lg font-medium text-gray-900">Low Stock Alerts</h3>
-                <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-[#F44336]">
-                  {stats?.lowStockCount || 0} items
+                <AlertTriangle className="text-destructive mr-2" size={20} />
+                <h3 className="text-lg font-medium">Low Stock Alerts</h3>
+                <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/20 text-destructive">
+                  {(stats as any)?.lowStockCount || 0} items
                 </span>
               </div>
               <Button
@@ -130,23 +141,23 @@ export default function Dashboard() {
             {lowStockLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="h-20 bg-gray-200 rounded-lg animate-pulse"></div>
+                  <div key={i} className="h-20 glass-card animate-pulse"></div>
                 ))}
               </div>
-            ) : lowStockItems && lowStockItems.length > 0 ? (
+            ) : (lowStockItems as any) && (lowStockItems as any).length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {lowStockItems.map((item: any) => (
+                {(lowStockItems as any).map((item: any) => (
                   <LowStockAlert key={item.id} item={item} />
                 ))}
               </div>
             ) : (
-              <div className="text-center text-gray-500 py-8">
-                <Package size={48} className="mx-auto mb-4 text-gray-300" />
+              <div className="text-center text-muted-foreground py-8">
+                <Package size={48} className="mx-auto mb-4 opacity-50" />
                 <p>No low stock items at this time</p>
               </div>
             )}
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

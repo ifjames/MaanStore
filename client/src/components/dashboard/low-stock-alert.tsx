@@ -1,4 +1,6 @@
 import { Badge } from "@/components/ui/badge";
+import { formatCurrency } from "@/lib/notifications";
+import { motion } from "framer-motion";
 
 interface LowStockAlertProps {
   item: {
@@ -11,18 +13,24 @@ interface LowStockAlertProps {
 
 export default function LowStockAlert({ item }: LowStockAlertProps) {
   return (
-    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="glass-card border border-red-200/50 p-4 hover:shadow-lg transition-all duration-200"
+    >
       <div className="flex items-center justify-between">
         <div>
-          <h4 className="font-medium text-gray-900">{item.itemName}</h4>
-          <p className="text-sm text-gray-600">${parseFloat(item.price).toFixed(2)}</p>
+          <h4 className="font-medium text-foreground">{item.itemName}</h4>
+          <p className="text-sm text-muted-foreground">
+            {formatCurrency(item.price, localStorage.getItem('currency') || 'PHP')}
+          </p>
         </div>
         <div className="text-right">
-          <Badge variant="destructive">
+          <Badge variant="destructive" className="shadow-sm">
             {item.stock} left
           </Badge>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

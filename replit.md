@@ -119,8 +119,27 @@ The application uses two main tables:
 
 ## Changelog
 
-- June 22, 2025. Initial setup
+- June 22, 2025: Initial setup with basic inventory management system
+- June 22, 2025: Major modernization update with glassmorphism design, PHP currency support, mobile compatibility, theme system, and enhanced notifications
+
+## Recent Changes
+
+### Major Modernization (June 22, 2025)
+- **Design System**: Implemented glassmorphism design with liquid glass effects
+- **Color Scheme**: Updated to modern purple/blue gradient palette (easier on eyes)
+- **Currency**: Changed to Philippine Peso (₱) as primary currency with multi-currency support
+- **Authentication**: Simplified admin credentials to admin/admin123
+- **Mobile Support**: Added full mobile responsiveness with animated sidebar
+- **Theme System**: Integrated light/dark theme support with system preference detection
+- **Notifications**: Replaced basic toasts with SweetAlert2 for modern glass-styled notifications
+- **Settings Page**: Added comprehensive settings with theme, currency, and system preferences
+- **Animations**: Enhanced UX with Framer Motion animations and floating background shapes
+- **Modern Libraries**: Integrated SweetAlert2, Framer Motion, and enhanced icon system
 
 ## User Preferences
 
-Preferred communication style: Simple, everyday language.
+- Preferred communication style: Simple, everyday language
+- Design preference: Modern, glassmorphism effects with soft colors
+- Currency: Philippine Peso (₱) 
+- Theme: Light mode with dark mode support
+- Mobile-first responsive design approach

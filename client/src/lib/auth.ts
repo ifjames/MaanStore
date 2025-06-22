@@ -1,24 +1,23 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "./queryClient";
-import { useToast } from "@/hooks/use-toast";
+import { showNotification } from "./notifications";
 import type { LoginData } from "@shared/schema";
 
 export function useAuth() {
-  const { data: user, isLoading, error } = useQuery({
+  const { data: response, isLoading, error } = useQuery({
     queryKey: ["/api/auth/user"],
     retry: false,
   });
 
   return {
-    user: error ? null : user?.user,
+    user: error ? null : (response as any)?.user,
     isLoading,
-    isAuthenticated: !!user?.user,
+    isAuthenticated: !!(response as any)?.user,
   };
 }
 
 export function useLogin() {
   const queryClient = useQueryClient();
-  const { toast } = useToast();
 
   return useMutation({
     mutationFn: async (credentials: LoginData) => {
@@ -27,24 +26,16 @@ export function useLogin() {
     },
     onSuccess: (data) => {
       queryClient.setQueryData(["/api/auth/user"], data);
-      toast({
-        title: "Login successful",
-        description: "Welcome to Maans' Store",
-      });
+      showNotification.success("Welcome back!", "Successfully logged into Maans' Store");
     },
     onError: (error: Error) => {
-      toast({
-        title: "Login failed",
-        description: error.message || "Invalid credentials",
-        variant: "destructive",
-      });
+      showNotification.error("Login failed", error.message || "Invalid credentials");
     },
   });
 }
 
 export function useLogout() {
   const queryClient = useQueryClient();
-  const { toast } = useToast();
 
   return useMutation({
     mutationFn: async () => {
@@ -53,10 +44,7 @@ export function useLogout() {
     onSuccess: () => {
       queryClient.setQueryData(["/api/auth/user"], null);
       queryClient.invalidateQueries();
-      toast({
-        title: "Logged out",
-        description: "You have been logged out successfully",
-      });
+      showNotification.success("Logged out", "You have been logged out successfully");
     },
   });
 }

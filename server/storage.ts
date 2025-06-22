@@ -36,7 +36,7 @@ export class MemStorage implements IStorage {
   private async initializeData() {
     // Create admin user
     await this.createUser({
-      email: "admin@maansstore.com",
+      email: "admin",
       password: "admin123", // In production, this should be hashed
     });
 
