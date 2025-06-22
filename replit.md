@@ -128,13 +128,21 @@ The application uses two main tables:
 - **Design System**: Implemented glassmorphism design with liquid glass effects
 - **Color Scheme**: Updated to modern purple/blue gradient palette (easier on eyes)
 - **Currency**: Changed to Philippine Peso (₱) as primary currency with multi-currency support
-- **Authentication**: Simplified admin credentials to admin/admin123
+- **Authentication**: Simplified admin credentials to admin/admin123 with fixed login validation
 - **Mobile Support**: Added full mobile responsiveness with animated sidebar
 - **Theme System**: Integrated light/dark theme support with system preference detection
 - **Notifications**: Replaced basic toasts with SweetAlert2 for modern glass-styled notifications
 - **Settings Page**: Added comprehensive settings with theme, currency, and system preferences
 - **Animations**: Enhanced UX with Framer Motion animations and floating background shapes
 - **Modern Libraries**: Integrated SweetAlert2, Framer Motion, and enhanced icon system
+
+### Enhanced Features (June 22, 2025)
+- **Login Page**: Redesigned with logo and store name positioned on the left side
+- **Activity Logging**: Implemented comprehensive logging for inventory operations (create, update, sync, login)
+- **Price Checker Chatbot**: Added conversational price checker page with real-time inventory lookup
+- **Navigation**: Enhanced sidebar with Price Checker access
+- **Smooth Animations**: Added modern animations for login form and page transitions
+- **Error Handling**: Improved error handling for invalid credentials and inventory queries
 
 ## User Preferences
 

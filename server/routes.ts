@@ -21,12 +21,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { email, password } = loginSchema.parse(req.body);
       
-      const user = await storage.getUserByEmail(email);
+      // Check by username (email field) or email
+      let user = await storage.getUserByEmail(email);
+      if (!user) {
+        // Try to find by username if not found by email
+        const allUsers = await storage.getAllUsers?.() || [];
+        user = allUsers.find(u => u.email === email || u.email.split('@')[0] === email);
+      }
+      
       if (!user || user.password !== password) {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
       currentUser = user;
+      
+      // Log the login action
+      await storage.logAction?.({
+        userId: user.id,
+        action: 'LOGIN',
+        details: `User ${user.email} logged in`,
+        timestamp: new Date()
+      });
+      
       res.json({ user: { id: user.id, email: user.email, isAdmin: user.isAdmin } });
     } catch (error) {
       console.error("Login error:", error);
@@ -145,6 +161,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
 
       const updatedInventory = await storage.syncInventoryData(validatedData);
+      
+      // Log the sync action
+      await storage.logAction?.({
+        userId: (req as any).user.id,
+        action: 'INVENTORY_SYNC',
+        details: `Synced ${updatedInventory.length} items from external data source`,
+        timestamp: new Date()
+      });
+      
       res.json({ 
         message: "Inventory synced successfully", 
         itemCount: updatedInventory.length 
@@ -152,6 +177,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error syncing inventory:", error);
       res.status(500).json({ message: "Failed to sync inventory" });
+    }
+  });
+
+  // Activity logs endpoint
+  app.get("/api/activity-logs", requireAuth, async (req, res) => {
+    try {
+      const logs = await storage.getActivityLogs?.() || [];
+      // Sort by timestamp descending (newest first)
+      const sortedLogs = logs.sort((a, b) => 
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      );
+      res.json(sortedLogs);
+    } catch (error) {
+      console.error("Error fetching activity logs:", error);
+      res.status(500).json({ message: "Failed to fetch activity logs" });
     }
   });
 

@@ -9,6 +9,7 @@ import Login from "@/pages/login";
 import Dashboard from "@/pages/dashboard";
 import Inventory from "@/pages/inventory";
 import PublicInventory from "@/pages/public-inventory";
+import PriceChecker from "@/pages/price-checker";
 import Settings from "@/pages/settings";
 import NotFound from "@/pages/not-found";
 import Sidebar from "@/components/layout/sidebar";
@@ -59,6 +60,11 @@ function Router() {
           <Route path="/inventory">
             <AuthenticatedLayout>
               <Inventory />
+            </AuthenticatedLayout>
+          </Route>
+          <Route path="/price-checker">
+            <AuthenticatedLayout>
+              <PriceChecker />
             </AuthenticatedLayout>
           </Route>
           <Route path="/settings">

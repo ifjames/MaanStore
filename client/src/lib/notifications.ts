@@ -12,7 +12,6 @@ export const showNotification = {
       toast: true,
       position: 'top-end',
       background: 'rgba(255, 255, 255, 0.95)',
-      backdrop: false,
       customClass: {
         popup: 'swal-glass-popup',
         title: 'swal-title',
@@ -32,7 +31,6 @@ export const showNotification = {
       toast: true,
       position: 'top-end',
       background: 'rgba(255, 255, 255, 0.95)',
-      backdrop: false,
       customClass: {
         popup: 'swal-glass-popup',
         title: 'swal-title',
@@ -52,7 +50,6 @@ export const showNotification = {
       toast: true,
       position: 'top-end',
       background: 'rgba(255, 255, 255, 0.95)',
-      backdrop: false,
       customClass: {
         popup: 'swal-glass-popup',
         title: 'swal-title',
@@ -72,7 +69,6 @@ export const showNotification = {
       toast: true,
       position: 'top-end',
       background: 'rgba(255, 255, 255, 0.95)',
-      backdrop: false,
       customClass: {
         popup: 'swal-glass-popup',
         title: 'swal-title',

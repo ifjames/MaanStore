@@ -19,6 +19,14 @@ export const inventory = pgTable("inventory", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const activityLogs = pgTable("activity_logs", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  action: text("action").notNull(),
+  details: text("details").notNull(),
+  timestamp: timestamp("timestamp").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
   password: true,
@@ -31,7 +39,7 @@ export const insertInventorySchema = createInsertSchema(inventory).pick({
 });
 
 export const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: z.string().min(1, "Username is required"),
   password: z.string().min(1, "Password is required"),
 });
 

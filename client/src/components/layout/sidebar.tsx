@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { useLogout, useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Store, BarChart3, Package, LogOut, User, Settings, Menu, X } from "lucide-react";
+import { Store, BarChart3, Package, Calculator, LogOut, User, Settings, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -14,6 +14,7 @@ export default function Sidebar() {
   const navigation = [
     { name: "Dashboard", href: "/dashboard", icon: BarChart3, current: location === "/" || location === "/dashboard" },
     { name: "Inventory", href: "/inventory", icon: Package, current: location === "/inventory" },
+    { name: "Price Checker", href: "/price-checker", icon: Calculator, current: location === "/price-checker" },
     { name: "Settings", href: "/settings", icon: Settings, current: location === "/settings" },
   ];
 

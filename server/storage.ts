@@ -5,6 +5,7 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  getAllUsers?(): Promise<User[]>;
   
   // Inventory operations
   getAllInventory(): Promise<Inventory[]>;
@@ -15,19 +16,27 @@ export interface IStorage {
   searchInventory(query: string): Promise<Inventory[]>;
   getLowStockItems(threshold?: number): Promise<Inventory[]>;
   syncInventoryData(items: InsertInventory[]): Promise<Inventory[]>;
+  
+  // Activity logging
+  logAction?(log: { userId: number; action: string; details: string; timestamp: Date }): Promise<void>;
+  getActivityLogs?(): Promise<any[]>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private inventory: Map<number, Inventory>;
+  private activityLogs: Map<number, any>;
   private currentUserId: number;
   private currentInventoryId: number;
+  private currentLogId: number;
 
   constructor() {
     this.users = new Map();
     this.inventory = new Map();
+    this.activityLogs = new Map();
     this.currentUserId = 1;
     this.currentInventoryId = 1;
+    this.currentLogId = 1;
     
     // Initialize with admin user
     this.initializeData();
@@ -148,6 +157,25 @@ export class MemStorage implements IStorage {
     }
     
     return result;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return Array.from(this.users.values());
+  }
+
+  async logAction(log: { userId: number; action: string; details: string; timestamp: Date }): Promise<void> {
+    const activityLog = {
+      id: this.currentLogId++,
+      userId: log.userId,
+      action: log.action,
+      details: log.details,
+      timestamp: log.timestamp,
+    };
+    this.activityLogs.set(activityLog.id, activityLog);
+  }
+
+  async getActivityLogs(): Promise<any[]> {
+    return Array.from(this.activityLogs.values());
   }
 }
 

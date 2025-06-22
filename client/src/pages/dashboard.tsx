@@ -10,7 +10,7 @@ import { motion } from "framer-motion";
 
 export default function Dashboard() {
   const queryClient = useQueryClient();
-  const { toast } = useToast();
+
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["/api/inventory/stats"],
