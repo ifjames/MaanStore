@@ -5,21 +5,25 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Store, Search, Clock } from "lucide-react";
+import { settingsService } from "@/lib/settings";
 
 export default function PublicInventory() {
   const [search, setSearch] = useState("");
+  
+  // Get user's low stock threshold for consistent display
+  const lowStockThreshold = settingsService.getLowStockThreshold();
 
   const { data: inventory, isLoading } = useQuery({
     queryKey: ["/api/inventory/public"],
   });
 
-  const filteredInventory = inventory?.filter((item: any) =>
+  const filteredInventory = Array.isArray(inventory) ? inventory.filter((item: any) =>
     item.itemName.toLowerCase().includes(search.toLowerCase())
-  ) || [];
+  ) : [];
 
   const getAvailabilityStatus = (stock: number) => {
     if (stock <= 0) return { label: "Out of Stock", variant: "destructive" as const };
-    if (stock <= 10) return { label: "Limited Stock", variant: "secondary" as const };
+    if (stock <= lowStockThreshold) return { label: "Limited Stock", variant: "secondary" as const };
     return { label: "In Stock", variant: "default" as const };
   };
 
@@ -62,46 +66,46 @@ export default function PublicInventory() {
         {/* Public Inventory Table */}
         <Card className="shadow-lg">
           <CardContent className="p-0">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">Available Products</h3>
+            <div className="px-6 py-4 border-b border-border">
+              <h3 className="text-lg font-medium text-foreground">Available Products</h3>
             </div>
             <div className="overflow-x-auto">
               {isLoading ? (
                 <div className="p-8 text-center">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#4CAF50] mx-auto mb-4"></div>
-                  <p className="text-gray-500">Loading inventory...</p>
+                  <p className="text-muted-foreground">Loading inventory...</p>
                 </div>
               ) : filteredInventory.length === 0 ? (
                 <div className="p-8 text-center">
-                  <Store size={48} className="mx-auto mb-4 text-gray-300" />
-                  <p className="text-gray-500">
+                  <Store size={48} className="mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-muted-foreground">
                     {search ? "No products found matching your search" : "No products available"}
                   </p>
                 </div>
               ) : (
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-border">
+                  <thead className="bg-muted/50">
                     <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Product Name
                       </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Price
                       </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Availability
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-background divide-y divide-border">
                     {filteredInventory.map((item: any) => {
                       const status = getAvailabilityStatus(item.stock);
                       return (
-                        <tr key={item.id} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <tr key={item.id} className="hover:bg-muted/50 transition-colors">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">
                             {item.itemName}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
                             ${parseFloat(item.price).toFixed(2)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
@@ -120,8 +124,8 @@ export default function PublicInventory() {
         </Card>
 
         {/* Footer */}
-        <div className="text-center mt-12 pt-8 border-t border-gray-200">
-          <p className="text-gray-500 flex items-center justify-center">
+        <div className="text-center mt-12 pt-8 border-t border-border">
+          <p className="text-muted-foreground flex items-center justify-center">
             <Clock size={16} className="mr-1" />
             Last updated: {new Date().toLocaleString()}
           </p>

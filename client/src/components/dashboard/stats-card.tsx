@@ -17,25 +17,25 @@ export default function StatsCard({ title, value, icon: Icon, color }: StatsCard
   };
 
   const textColorClasses = {
-    primary: "text-gray-900",
-    secondary: "text-gray-900",
+    primary: "text-foreground",
+    secondary: "text-foreground", 
     danger: "text-[#F44336]",
-    accent: "text-gray-900",
+    accent: "text-foreground",
   };
 
   return (
     <Card className="store-card">
-      <CardContent className="p-6">
+      <CardContent className="p-3 sm:p-6">
         <div className="flex items-center">
           <div className="flex-shrink-0">
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${colorClasses[color]}`}>
-              <Icon size={16} />
+            <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center ${colorClasses[color]}`}>
+              <Icon size={14} className="sm:w-4 sm:h-4" />
             </div>
           </div>
-          <div className="ml-4 w-0 flex-1">
+          <div className="ml-3 sm:ml-4 w-0 flex-1 min-w-0">
             <dl>
-              <dt className="text-sm font-medium text-gray-500 truncate">{title}</dt>
-              <dd className={`text-2xl font-semibold ${color === 'danger' ? textColorClasses[color] : 'text-gray-900'}`}>
+              <dt className="text-xs sm:text-sm font-medium text-muted-foreground truncate">{title}</dt>
+              <dd className={`text-base sm:text-lg lg:text-xl font-semibold ${textColorClasses[color]} truncate break-all`}>
                 {value}
               </dd>
             </dl>

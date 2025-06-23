@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { formatCurrency } from "@/lib/notifications";
+import { formatCurrency } from "@/lib/format";
 import { motion } from "framer-motion";
 
 interface LowStockAlertProps {
@@ -22,7 +22,7 @@ export default function LowStockAlert({ item }: LowStockAlertProps) {
         <div>
           <h4 className="font-medium text-foreground">{item.itemName}</h4>
           <p className="text-sm text-muted-foreground">
-            {formatCurrency(item.price, localStorage.getItem('currency') || 'PHP')}
+            {formatCurrency(parseFloat(item.price))}
           </p>
         </div>
         <div className="text-right">

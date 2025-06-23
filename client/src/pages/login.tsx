@@ -61,7 +61,7 @@ export default function Login() {
                 <div className="space-y-5">
                   <div>
                     <Label htmlFor="email" className="block text-sm font-medium mb-2">
-                      Username or Email
+                      Email
                     </Label>
                     <Input
                       id="email"
@@ -71,7 +71,7 @@ export default function Login() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="store-input"
-                      placeholder="admin"
+                      placeholder="Email"
                     />
                   </div>
                   <div>
@@ -141,9 +141,9 @@ export default function Login() {
 
               {/* Demo credentials */}
               <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                <p className="text-xs font-medium text-blue-800 dark:text-blue-200 mb-1">Demo Credentials:</p>
-                <p className="text-xs text-blue-600 dark:text-blue-300">Username: admin</p>
-                <p className="text-xs text-blue-600 dark:text-blue-300">Password: admin123</p>
+                <p className="text-xs font-medium text-blue-800 dark:text-blue-200 mb-1">Credentials:</p>
+                <p className="text-xs text-blue-600 dark:text-blue-300">Username: admin@maan.com</p>
+                <p className="text-xs text-blue-600 dark:text-blue-300">Password: 123456</p>
               </div>
             </CardContent>
           </Card>

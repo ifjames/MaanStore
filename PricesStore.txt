@@ -1,0 +1,291 @@
+ALCOHOLIC AND BEVERAGES (CATEGORY)
+Product - Items | Retail Price | Stocks
+--- | --- | ---
+Coca Cola Mismo (290 mL) | 21 | 
+Sprite Mismo (290 mL) | 21 | 
+Mountain Dew (290 mL) | 21 | 
+Royal (290 mL) | 21 | 
+Sting (290 mL) | 22 | 
+C2 (230 mL) | 15 | 
+C2 (1000 mL) | 55 | 
+Gatorade Blue - 350 mL | 39 | 
+Cobra (300 mL) | 22 | 
+Coca Cola 1.5 | 70 | 
+Sprite 1.5 | 70 | 
+Royal 1.5 | 70 | 
+
+CIGARETS (CATEGORY)
+Product - Items | Retail Price | Stocks
+--- | --- | ---
+Marlboro Red | 10 | 
+Marlboro Light | 10 | 
+Marlboro Blue | 10 | 
+Camel | 7 | 
+Fortune | 8 | 
+Mighty | 8 | 
+
+JUICES RTD & DAIRY + POWDER (CATEGORY)
+Product - Items | Retail Price | Stocks
+--- | --- | ---
+Pineapple Juice - Del Monte | 36 | 
+Zesto | 11 | 
+Yakult | 11 | 
+Chuckie | 15 | 
+Tang Powder (Orange) | 22 | 
+Tang Powder (Pineapple) | 22 | 
+Nestea Powder (Lemon) | 23 | 
+Bear Brand Fortified | 14 | 
+Milo | 10 | 
+Alaska Evaporada - Big | 40 | 
+Alaska Evaporada - Small | 22 | 
+Alaska Condensada - Big | 60 | 
+Angel Evaporada | 22 | 
+Doreen Condensada | 55 | 
+Energen | 11 | 
+Water 1000 mL | 20 | 
+Water 330 mL | 10 | 
+Water 500 mL | 15 | 
+Leah Filled Water | 35 | 
+Mr. Gulaman | 20 | 
+
+WINE AND RUM (CATEGORY)
+Product - Items | Retail Price | Stocks
+--- | --- | ---
+Alfonso | 310 | 
+SMB Gin (Bilog) | 75 | 
+SMB Gin (Quatro) | 145 | 
+Red Horse (Liter) | 135 | 
+San Miguel Pale Pilsen | 42 | 
+SMB Grande | 135 | 
+GSM Blue | 145 | 
+
+CAN FOODS (CATEGORY)
+Product - Items | Retail Price | Stocks
+--- | --- | ---
+555 Sardines - Red | 28 | 
+555 Sardines - Green | 28 | 
+Mega Sardines - Red | 29 | 
+Mega Sardines - Green | 29 | 
+Ligo Sardines - Red | 29 | 
+555 Tuna Sardines Caldereta/Mechado | 34 | 
+555 Tuna Sardines Afritada | 34 | 
+Argentina Corned Beef Small - 100 g | 32 | 
+Argentina Corned Beef Big - 150g | 41 | 
+PureFood Corned Beef | 95 | 
+Hiland Corned Beef | 42 | 
+San Marino | 32 | 
+CDO Meat Loaf | 35 | 
+CDO Karne Norte | 30 | 
+Reno Liver Spread | 32 | 
+Maling Chicken | 135 | 
+Purefood Luncheon Meat | 100 | 
+Afritada Small | 26 | 
+Century Tuna Hot and Spicy | 41 | 
+Century Tuna Flakes | 41 | 
+Argentina Meatloaf | 37 | 
+Argentina Giniling | 38 | 
+Pineapple Chunks | 68 | 
+Hotdog | 36 | 
+Tocino | 70 | 
+Prime Sweet Corn | 45 | 
+Prime Whole Kernel Corn | 48 | 
+Jolly Green Peas | 22 | 
+
+SEASONING (CATEGORY)
+Product - Items | Retail Price | Stocks
+--- | --- | ---
+Magic Sarap (16pcs/pack) | 7 | 
+Ginisa Mix (16pcs/pack) | 6 | 
+Vetsin (18/pack) | 6 | 
+Sinigang Mix (Tamarind) - Small | 8 | 
+Sinigang Mix (Tamarind) - Big | 17 | 
+Knorr Cube (Pork) | 8 | 
+Knorr Cube (Chicken) | 8 | 
+Knorr Cube (Beef) | 8 | 
+Star Margarine | 35 | 
+Eden Cheese | 65 | 
+Queso | 47 | 
+Cheeze Whiz Pouch | 15 | 
+Ladies Choice Mayonnaise | 40 | 
+Corn Starch - Box | 35 | 
+
+FOOD ADDITIVES (CATEGORY)
+Product - Items | Retail Price | Stocks
+--- | --- | ---
+Coco Mama | 38 | 
+Silver Swan Soy Sauce 200 mL Pouch | 13 | 
+Select Soy Sauce - Pouch (200 mL) | 13 | 
+Select Soy Sauce - Bottle (350 mL) | 21 | 
+Silver Swan Suka - Pouch (200 mL) | 11 | 
+Silver Swan Suka - Pouch (100 mL) | 9 | 
+Silver Swan Suka (350 mL Bottle) | 20 | 
+Silver Swan Soy Sauce 350 mL | 21 | 
+Datu Puti Patis - Pouch (150 mL) | 17 | 
+Datu Puti Vinegar - Pouch (100 mL) | 9 | 
+Datu Puti Patis - Bottle (350 mL) | 28 | 
+Datu Puti Soy Sauce - Budget Pack | 9 | 
+Datu Puti Vinegar 200 mL | 13 | 
+Datu Puti Vinegar 350 mL | 20 | 
+Tomato Sauce Pouch | 22 | 
+Mama Cita Oyster Sauce | 8 | 
+Tidbits | 20 | 
+UFC Tamis Anghang Ketchup (100g) - Pouch | 13 | 
+UFC Tamis Anghang Ketchup (200g) - Pouch | 20 | 
+UFC Ketchup - Bottle | 32 | 
+Crispy Fry | 20 | 
+Ernies Bagoong | 28 | 
+Ernies Patis | 28 | 
+Lorins Patis | 28 | 
+Spaghetti Sauce Big - 500g | 67 | 
+Spaghetti Sauce Small - 250g | 38 | 
+Mang Tomas Chilli Hot | 42 | 
+Mang Tomas Regular | 41 | 
+Jolly Mushroom in Pieces | 22 | 
+Mang Tomas Pouch Hot | 15 | 
+
+NOODLES + VEGETABLE GRAIN (CATEGORY)
+Product - Items | Retail Price | Stocks
+--- | --- | ---
+Pancit Canton - All Flavours | 18 | 
+Noodle Soup - All Flavours | 12 | 
+Cup Noodles - Regular Flavor (Chicken, Seafood, Beef) | 26 | 
+Cup Noodles - Sotanghon Flavor | 29 | 
+Cup Noodles - Jjampong Flavor | 30 | 
+Sotanghon | 11 | 
+Mongo | 13 | 
+Nissin Ramen Spicy Hot Beef | 16 | 
+Nissin Ramen Beef | 13 | 
+
+JUNK FOOD - SITSIRYA (CATEGORY)
+Product - Items | Retail Price | Stocks
+--- | --- | ---
+Chili Bangus | 8 | 
+Tortillos (Black, Orange, Red) | 9 | 
+Tortillos Big | 28 | 
+Piattos (Green, Blue) | 18 | 
+Piattos Big | 40 | 
+Nova | 18 | 
+Chippy Small | 9 | 
+Clover | 8 | 
+Oishi Prawn Crackers | 8 | 
+Mani - Adobo | 5 | 
+Beans | 5 | 
+Sugo Peanut | 3 | 
+Pritong Bangus - Kracker | 8 | 
+Big Boy | 8 | 
+Mr. Chips Big | 25 | 
+Boy Bawang | 26 | 
+Snacku | 10 | 
+Corn Bits | 26 | 
+
+PERSONAL HYGIENE ITEMS (CATEGORY)
+Product - Items | Retail Price | Stocks
+--- | --- | ---
+Silka Soap Orange - 65 grams | 23 | 
+Silka Soap Green - 65 g | 24 | 
+Bioderm Freshen - 90g | 35 | 
+Bioderm Pink-Bloom (65g) | 22 | 
+Bioderm Blue-Coolness (65g) | 22 | 
+Bioderm Intense (68g) | 22 | 
+Safe Guard | 24 | 
+Rexona White and Blue | 10 | 
+Colgate Sachet | 11 | 
+Colgate Regular | 88 | 
+Happe Toothpaste | 45 | 
+Palmolive Shampoo | 8 | 
+Keratene Black | 10 | 
+Keratene Gold | 10 | 
+Sunsilk Shampoo | 9 | 
+Pantene | 9 | 
+Creamsilk (Green, Pink) | 11 | 
+Head N Shoulder | 9 | 
+Diaper - Happy | 10 | 
+Napkin - Sister Reg. | 5 | 
+Napkin - Charmee Non Wings | 5 | 
+Carefree - Panty Shield | 2 | 
+Napkin - Charmee on Night | 10 | 
+Cotton Buds | 22 | 
+Oral-B Toothbrush | 25 | 
+Colgate Toothbrush | 35 | 
+Gillette Blade Razor | 20 | 
+Sister with Wings - Overnight | 10 | 
+Cleene Cotton | 15 | 
+Sunny Care Cotton Rolls | 10 | 
+Tender Care Powder | 29 | 
+Ethyl Alcohol 70% | 45 | 
+Charmee No Wing | 10 | 
+
+DETERGENTS (CATEGORY)
+Product - Items | Retail Price | Stocks
+--- | --- | ---
+Ariel Powder | 16 | 
+Surf - All Types | 8 | 
+Zonrox Colored | 28 | 
+Zonrox Lemon/Original | 20 | 
+Tide Bar (Fantasy) | 16 | 
+Downy (Passion) | 8 | 
+Downy Blue - 26 mL | 8 | 
+Downy Pink - 26 mL | 8 | 
+Tide Powder | 16 | 
+Max Glow Dishwashing Liquid | 25 | 
+Perla Blue Bar | 21 | 
+Joy Dishwashing Liquid | 10 | 
+
+BREAD AND COOKIES (CATEGORY)
+Product - Items | Retail Price | Stocks
+--- | --- | ---
+Hansel/Fita/Skyflakes | 7 | 
+SkyFlakes Cream | 8 | 
+Creamo | 9 | 
+Choco Mucho | 10 | 
+Cheese Cake/Fudge Bar | 10 | 
+Pillows | 8 | 
+Dewberry | 10 | 
+Oreo | 10 | 
+Tops Sarap/Cheese Cake | 10 | 
+Graham Crash | 48 | 
+Graham Cracker | 48 | 
+V Fresh | 4 for 5 pesos | 
+Cloud 9 | 3 | 
+Max Candy | 4 for 5 pesos | 
+Bread Patinda | 7 | 
+
+RICE (CATEGORY)
+Product - Items | Retail Price | Stocks
+--- | --- | ---
+Jasmin Denorado 25 kg | 1160 | 
+
+OTHER FOODS (CATEGORY)
+Product - Items | Retail Price | Stocks
+--- | --- | ---
+Eggs | 10 | 
+Sugar Brown | 23 | 
+Sugar White | 25 | 
+Canola Oil | 145 | 
+Ordinary Oil Bottle | 36 | 
+Paminta | 1 | 
+Sibuyas | 8 | 
+Bawang | 10 | 
+Laurel | 1 | 
+Tawas | 1 | 
+
+COFFEE (CATEGORY)
+Product - Items | Retail Price | Stocks
+--- | --- | ---
+Kopiko Black | 15 | 
+Kopiko Brown | 15 | 
+Nescafe Original (TP) | 16 | 
+Nescafe Cream White | 16 | 
+Kopiko Blanca | 15 | 
+Nescafe Original in Pack | 27 | 
+Great Taste Granular | 25 | 
+Stick Coffee | 3 | 
+
+OTHER ITEMS (CATEGORY)
+Product - Items | Retail Price | Stocks
+--- | --- | ---
+Scotch Brite | 20 | 
+Steel Wool | 20 | 
+Lighter | 10 | 
+Posporo | 5 | 
+Shoe Glue | 20 |

@@ -15,6 +15,7 @@ export const inventory = pgTable("inventory", {
   itemName: text("item_name").notNull(),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   stock: integer("stock").notNull(),
+  category: text("category").notNull().default("General"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -27,6 +28,14 @@ export const activityLogs = pgTable("activity_logs", {
   timestamp: timestamp("timestamp").defaultNow(),
 });
 
+export const categories = pgTable("categories", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
   password: true,
@@ -36,6 +45,12 @@ export const insertInventorySchema = createInsertSchema(inventory).pick({
   itemName: true,
   price: true,
   stock: true,
+  category: true,
+}).required({ category: true });
+
+export const insertCategorySchema = createInsertSchema(categories).pick({
+  name: true,
+  description: true,
 });
 
 export const loginSchema = z.object({
@@ -47,4 +62,6 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertInventory = z.infer<typeof insertInventorySchema>;
 export type Inventory = typeof inventory.$inferSelect;
+export type InsertCategory = z.infer<typeof insertCategorySchema>;
+export type Category = typeof categories.$inferSelect;
 export type LoginData = z.infer<typeof loginSchema>;

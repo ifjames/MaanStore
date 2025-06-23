@@ -118,3 +118,38 @@ export const formatCurrency = (amount: number | string, currency: string = 'PHP'
     maximumFractionDigits: 2,
   }).format(numAmount).replace(/^\$/, currencyConfig.symbol);
 };
+
+export const formatCompactCurrency = (amount: number | string, currency: string = 'PHP'): string => {
+  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+  
+  const currencies: Record<string, { symbol: string; locale: string }> = {
+    PHP: { symbol: '₱', locale: 'en-PH' },
+    USD: { symbol: '$', locale: 'en-US' },
+    EUR: { symbol: '€', locale: 'de-DE' },
+    GBP: { symbol: '£', locale: 'en-GB' }
+  };
+
+  const currencyConfig = currencies[currency] || currencies.PHP;
+  
+  // For large numbers, use compact notation
+  if (Math.abs(numAmount) >= 1000000) {
+    return `${currencyConfig.symbol}${(numAmount / 1000000).toFixed(1)}M`;
+  } else if (Math.abs(numAmount) >= 1000) {
+    return `${currencyConfig.symbol}${(numAmount / 1000).toFixed(1)}K`;
+  } else {
+    return `${currencyConfig.symbol}${numAmount.toFixed(0)}`;
+  }
+};
+
+export const formatCompactNumber = (amount: number | string): string => {
+  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+  
+  // For large numbers, use compact notation
+  if (Math.abs(numAmount) >= 1000000) {
+    return `${(numAmount / 1000000).toFixed(1)}M`;
+  } else if (Math.abs(numAmount) >= 1000) {
+    return `${(numAmount / 1000).toFixed(1)}K`;
+  } else {
+    return numAmount.toString();
+  }
+};

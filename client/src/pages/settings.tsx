@@ -1,17 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTheme } from "@/components/providers/theme-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { 
   Settings as SettingsIcon, 
   Palette, 
   Globe, 
-  Bell, 
   Shield, 
   Monitor, 
   Sun, 
@@ -22,33 +20,44 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
+import { migrateLegacySettings } from "@/lib/settings";
+import { useQueryClient } from "@tanstack/react-query";
+import { useLowStockThreshold } from "@/hooks/use-settings";
 
 export default function Settings() {
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
-  const [currency, setCurrency] = useState(() => localStorage.getItem('currency') || 'PHP');
-  const [notifications, setNotifications] = useState(() => localStorage.getItem('notifications') === 'true');
-  const [autoSync, setAutoSync] = useState(() => localStorage.getItem('autoSync') === 'true');
-  const [lowStockThreshold, setLowStockThreshold] = useState(() => localStorage.getItem('lowStockThreshold') || '10');
+  const queryClient = useQueryClient();
+  const { lowStockThreshold, setLowStockThreshold } = useLowStockThreshold();
+  const [localThreshold, setLocalThreshold] = useState<string>('10');
+
+  // Load settings on component mount
+  useEffect(() => {
+    migrateLegacySettings();
+    setLocalThreshold(lowStockThreshold.toString());
+  }, [lowStockThreshold]);
 
   const handleSaveSettings = () => {
-    localStorage.setItem('currency', currency);
-    localStorage.setItem('notifications', notifications.toString());
-    localStorage.setItem('autoSync', autoSync.toString());
-    localStorage.setItem('lowStockThreshold', lowStockThreshold);
-    
-    toast({
-      title: "Settings saved",
-      description: "Your preferences have been updated successfully",
-    });
+    try {
+      // Save the low stock threshold
+      setLowStockThreshold(parseInt(localThreshold));
+      
+      // Invalidate relevant queries to refresh data with new threshold
+      queryClient.invalidateQueries({ queryKey: ["inventory-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["low-stock-items"] });
+      
+      toast({
+        title: "Settings saved",
+        description: "Your preferences have been updated successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error saving settings",
+        description: "Failed to save your preferences. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
-
-  const currencies = [
-    { value: 'PHP', label: 'Philippine Peso (₱)', symbol: '₱' },
-    { value: 'USD', label: 'US Dollar ($)', symbol: '$' },
-    { value: 'EUR', label: 'Euro (€)', symbol: '€' },
-    { value: 'GBP', label: 'British Pound (£)', symbol: '£' },
-  ];
 
   const themeOptions = [
     { value: 'light', label: 'Light', icon: Sun },
@@ -58,7 +67,7 @@ export default function Settings() {
 
   return (
     <div className="flex-1 overflow-y-auto mobile-padding py-6">
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-4xl mx-auto space-y-6 mobile-content">
         {/* Header */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -66,14 +75,12 @@ export default function Settings() {
           className="mb-8"
         >
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
-              <SettingsIcon className="text-white" size={20} />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
+              <SettingsIcon className="text-white" size={16} />
             </div>
-            <h1 className="text-3xl font-bold text-gradient">Settings</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gradient">Settings</h1>
           </div>
-          <p className="text-muted-foreground mobile-text">
-            Customize your Maans' Store experience
-          </p>
+          <p className="text-muted-foreground mobile-text">Customize your store management experience</p>
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -117,30 +124,6 @@ export default function Settings() {
                     })}
                   </div>
                 </div>
-
-                <Separator />
-
-                <div>
-                  <Label className="text-base font-medium">Currency</Label>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Select your preferred currency for displaying prices
-                  </p>
-                  <Select value={currency} onValueChange={setCurrency}>
-                    <SelectTrigger className="store-input">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {currencies.map((curr) => (
-                        <SelectItem key={curr.value} value={curr.value}>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">{curr.symbol}</span>
-                            {curr.label}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
               </CardContent>
             </Card>
           </motion.div>
@@ -159,42 +142,12 @@ export default function Settings() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <Label className="text-base font-medium">Notifications</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Enable system notifications
-                    </p>
-                  </div>
-                  <Switch
-                    checked={notifications}
-                    onCheckedChange={setNotifications}
-                  />
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <Label className="text-base font-medium">Auto Sync</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Automatically sync inventory data
-                    </p>
-                  </div>
-                  <Switch
-                    checked={autoSync}
-                    onCheckedChange={setAutoSync}
-                  />
-                </div>
-
-                <Separator />
-
                 <div>
                   <Label className="text-base font-medium">Low Stock Threshold</Label>
                   <p className="text-sm text-muted-foreground mb-3">
                     Alert when stock falls below this number
                   </p>
-                  <Select value={lowStockThreshold} onValueChange={setLowStockThreshold}>
+                  <Select value={localThreshold} onValueChange={setLocalThreshold}>
                     <SelectTrigger className="store-input">
                       <SelectValue />
                     </SelectTrigger>
@@ -205,6 +158,18 @@ export default function Settings() {
                       <SelectItem value="20">20 items</SelectItem>
                     </SelectContent>
                   </Select>
+                  
+                  {/* Preview */}
+                  <div className="mt-3 p-3 bg-muted/50 rounded-lg border">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Badge variant="secondary" className="text-xs">
+                        Preview
+                      </Badge>
+                      <span className="text-muted-foreground">
+                        Items with {localThreshold} or fewer units will be marked as "Low Stock"
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>

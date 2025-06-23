@@ -118,10 +118,11 @@
   }
   
   .glass-sidebar {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
   }
   
   /* Modern buttons with gradients */
@@ -192,6 +193,63 @@
     @apply text-sm sm:text-base;
   }
   
+  /* Mobile-specific layout adjustments */
+  @media (max-width: 1024px) {
+    .lg\:ml-64 {
+      margin-left: 0 !important;
+    }
+    
+    /* Ensure content doesn't go under mobile menu button */
+    .mobile-content {
+      padding-top: 4rem;
+    }
+    
+    /* Better mobile card spacing */
+    .mobile-card-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    
+    /* Mobile table responsive */
+    .mobile-table {
+      font-size: 0.875rem;
+    }
+    
+    .mobile-table th,
+    .mobile-table td {
+      padding: 0.5rem;
+    }
+  }
+  
+  @media (max-width: 640px) {
+    /* Extra small screens */
+    .mobile-padding {
+      @apply px-3;
+    }
+    
+    /* Smaller buttons on mobile */
+    .mobile-btn {
+      @apply text-xs px-2 py-1;
+    }
+    
+    /* Stack form elements vertically */
+    .mobile-form {
+      @apply space-y-3;
+    }
+    
+    /* Hide certain columns on very small screens */
+    .mobile-hidden {
+      display: none;
+    }
+    
+    /* Make dialogs full width on mobile */
+    .mobile-dialog {
+      width: 95vw;
+      max-width: 95vw;
+      margin: 1rem;
+    }
+  }
+  
   /* Currency formatting */
   .currency-php::before {
     content: '₱';
@@ -235,8 +293,9 @@
 }
 
 .dark .glass-sidebar {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.3);
   border-right: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
 }
 
 /* SweetAlert2 Custom Styles */
