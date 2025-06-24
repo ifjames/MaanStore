@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Store, Search, Clock } from "lucide-react";
 import { settingsService } from "@/lib/settings";
+import { formatCurrency } from "@/lib/notifications";
 
 export default function PublicInventory() {
   const [search, setSearch] = useState("");
@@ -106,7 +107,7 @@ export default function PublicInventory() {
                             {item.itemName}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
-                            ${parseFloat(item.price).toFixed(2)}
+                            {formatCurrency(parseFloat(item.price), 'PHP')}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <Badge variant={status.variant}>

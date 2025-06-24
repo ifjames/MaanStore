@@ -2,7 +2,8 @@ import StatsCard from "@/components/dashboard/stats-card";
 import LowStockAlert from "@/components/dashboard/low-stock-alert";
 import { Button } from "@/components/ui/button";
 import { Package, Warehouse, AlertTriangle, DollarSign, BarChart3, Clock, AlertCircle, Loader } from "lucide-react";
-import { formatCompactNumber, formatCurrency } from "@/lib/format";
+import { formatCompactNumber } from "@/lib/format";
+import { formatCurrency } from "@/lib/notifications";
 import { activityLogService } from "@/lib/firestore-service";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
@@ -133,7 +134,7 @@ export default function Dashboard() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
             <StatsCard
               title="Total Value"
-              value={formatCurrency(stats?.totalValue || 0)}
+              value={formatCurrency(stats?.totalValue || 0, 'PHP')}
               icon={DollarSign}
               color="accent"
             />

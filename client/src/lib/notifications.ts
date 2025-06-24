@@ -228,12 +228,18 @@ export const formatCurrency = (amount: number | string, currency: string = 'PHP'
 
   const currencyConfig = currencies[currency] || currencies.PHP;
   
+  // For PHP, directly format with peso symbol to avoid locale issues
+  if (currency === 'PHP') {
+    return `₱${numAmount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+  }
+  
+  // For other currencies, use Intl.NumberFormat
   return new Intl.NumberFormat(currencyConfig.locale, {
     style: 'currency',
-    currency: currency === 'PHP' ? 'USD' : currency, // PHP fallback to USD for Intl
+    currency: currency,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(numAmount).replace(/^\$/, currencyConfig.symbol);
+  }).format(numAmount);
 };
 
 export const formatCompactCurrency = (amount: number | string, currency: string = 'PHP'): string => {
