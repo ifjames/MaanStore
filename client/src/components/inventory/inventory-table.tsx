@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Package, AlertTriangle, CheckCircle, Edit, Trash2 } from "lucide-react";
-import { formatCurrency } from "@/lib/notifications";
+import { formatCurrency, confirmAction } from "@/lib/notifications";
 import { EditInventoryModal } from "./edit-inventory-modal";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { showNotification } from "@/lib/notifications";
@@ -69,8 +69,10 @@ export default function InventoryTable({ inventory, isLoading }: InventoryTableP
     setEditModalOpen(true);
   };
 
-  const handleDelete = (item: Inventory) => {
-    if (confirm('Are you sure you want to delete this item?')) {
+  const handleDelete = async (item: Inventory) => {
+    const result = await confirmAction.delete(item.itemName, 'inventory item');
+    
+    if (result.isConfirmed) {
       deleteMutation.mutate(item);
     }
   };
@@ -118,70 +120,117 @@ export default function InventoryTable({ inventory, isLoading }: InventoryTableP
         <div className="px-6 py-4 border-b border-border bg-muted/30 dark:bg-muted/20">
           <h3 className="text-lg font-medium text-foreground">Current Inventory</h3>
         </div>
-        <div className="overflow-x-auto">
+        <div>
           {inventory.length === 0 ? (
             <div className="p-8 text-center bg-background dark:bg-background">
               <Package size={48} className="mx-auto mb-4 text-muted-foreground" />
               <p className="text-muted-foreground">No inventory items found</p>
             </div>
           ) : (
-            <table className="min-w-full divide-y divide-border">
-              <thead className="bg-muted/30 dark:bg-muted/20">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    Item Name
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    Category
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    Price
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    Stock Level
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-background dark:bg-background divide-y divide-border">
+            <>
+              {/* Desktop Table View */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="min-w-full divide-y divide-border">
+                  <thead className="bg-muted/30 dark:bg-muted/20">
+                    <tr>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        Item Name
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        Category
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        Price
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        Stock Level
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-background dark:bg-background divide-y divide-border">
+                    {inventory.map((item, index) => {
+                      debugLog('InventoryTable', `🔍 Rendering table row ${index + 1}/${inventory.length} for: "${item.itemName}" (ID: ${item.id})`);
+                      
+                      const status = getStockStatus(item.stock);
+                      const StatusIcon = status.icon;
+                      
+                      return (
+                        <tr 
+                          key={`${item.id}-${item.itemName}`}
+                          className="hover:bg-muted/30 dark:hover:bg-muted/20 transition-colors border-b border-border"
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground dark:text-foreground">
+                            {item.itemName}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground dark:text-muted-foreground">
+                            <Badge variant="outline" className="text-xs">
+                              {item.category || 'General'}
+                            </Badge>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground dark:text-foreground">
+                            {formatCurrency(item.price, localStorage.getItem('currency') || 'PHP')}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground dark:text-foreground">
+                            {item.stock}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <Badge variant={status.variant} className="inline-flex items-center">
+                              <StatusIcon size={12} className="mr-1" />
+                              {status.label}
+                            </Badge>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+                            <div className="flex space-x-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleEdit(item)}
+                                className="h-8 w-8 p-0"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleDelete(item)}
+                                disabled={deleteMutation.isPending}
+                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Card View */}
+              <div className="md:hidden space-y-4 p-4">
                 {inventory.map((item, index) => {
-                  debugLog('InventoryTable', `🔍 Rendering table row ${index + 1}/${inventory.length} for: "${item.itemName}" (ID: ${item.id})`);
+                  debugLog('InventoryTable', `🔍 Rendering mobile card ${index + 1}/${inventory.length} for: "${item.itemName}" (ID: ${item.id})`);
                   
                   const status = getStockStatus(item.stock);
                   const StatusIcon = status.icon;
                   
                   return (
-                    <tr 
-                      key={`${item.id}-${item.itemName}`}
-                      className="hover:bg-muted/30 dark:hover:bg-muted/20 transition-colors border-b border-border"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground dark:text-foreground">
-                        {item.itemName}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground dark:text-muted-foreground">
-                        <Badge variant="outline" className="text-xs">
-                          {item.category || 'General'}
-                        </Badge>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground dark:text-foreground">
-                        {formatCurrency(item.price, localStorage.getItem('currency') || 'PHP')}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground dark:text-foreground">
-                        {item.stock}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <Badge variant={status.variant} className="inline-flex items-center">
-                          <StatusIcon size={12} className="mr-1" />
-                          {status.label}
-                        </Badge>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                        <div className="flex space-x-2">
+                    <Card key={`${item.id}-${item.itemName}-mobile`} className="p-4 hover:shadow-md transition-shadow">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-sm text-foreground">{item.itemName}</h3>
+                          <Badge variant="outline" className="text-xs mt-1">
+                            {item.category || 'General'}
+                          </Badge>
+                        </div>
+                        <div className="flex space-x-2 ml-2">
                           <Button
                             size="sm"
                             variant="outline"
@@ -200,12 +249,37 @@ export default function InventoryTable({ inventory, isLoading }: InventoryTableP
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
-                      </td>
-                    </tr>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                          <p className="text-muted-foreground text-xs">Price</p>
+                          <p className="font-medium text-foreground">
+                            {formatCurrency(item.price, localStorage.getItem('currency') || 'PHP')}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground text-xs">Stock</p>
+                          <p className="font-medium text-foreground">{item.stock}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="mt-3 pt-3 border-t border-border">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="text-muted-foreground text-xs">Status</p>
+                            <Badge variant={status.variant} className="inline-flex items-center text-xs mt-1">
+                              <StatusIcon size={12} className="mr-1" />
+                              {status.label}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
                   );
                 })}
-              </tbody>
-            </table>
+              </div>
+            </>
           )}
         </div>
       </CardContent>

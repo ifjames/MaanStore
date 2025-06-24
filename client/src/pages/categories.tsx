@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { categoryService, activityLogService, inventoryService, type Category } from "@/lib/firestore-service";
 import { useAuth } from "@/lib/auth";
 import { useFirestoreCategories } from "@/hooks/use-firestore-realtime";
+import { confirmAction } from "@/lib/notifications";
 
 export default function Categories() {
   // Use Firestore real-time hooks for auto-refreshing categories data
@@ -210,7 +211,9 @@ export default function Categories() {
   };
 
   const handleDeleteCategory = async (category: Category) => {
-    if (!confirm(`Are you sure you want to delete the category "${category.name}"? This action cannot be undone.`)) {
+    const result = await confirmAction.delete(category.name, 'category');
+    
+    if (!result.isConfirmed) {
       return;
     }
 

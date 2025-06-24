@@ -13,6 +13,7 @@ import Inventory from "@/pages/inventory";
 import Categories from "@/pages/categories";
 import PublicInventory from "@/pages/public-inventory";
 import PriceChecker from "@/pages/price-checker";
+import Sales from "@/pages/sales";
 import Logs from "@/pages/logs";
 import Settings from "@/pages/settings";
 import NotFound from "@/pages/not-found";
@@ -84,6 +85,11 @@ function Router() {
           <Route path="/price-checker">
             <AuthenticatedLayout>
               <PriceChecker />
+            </AuthenticatedLayout>
+          </Route>
+          <Route path="/sales">
+            <AuthenticatedLayout>
+              <Sales />
             </AuthenticatedLayout>
           </Route>
           <Route path="/logs">

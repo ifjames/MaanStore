@@ -1,9 +1,10 @@
 import { Link, useLocation } from "wouter";
 import { useLogout, useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Store, BarChart3, Package, Calculator, LogOut, User, Settings, Menu, X, Activity, FolderOpen } from "lucide-react";
+import { Store, BarChart3, Package, Calculator, LogOut, User, Settings, Menu, X, Activity, FolderOpen, TrendingUp } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { confirmAction } from "@/lib/notifications";
 
 export default function Sidebar() {
   const [location] = useLocation();
@@ -16,12 +17,17 @@ export default function Sidebar() {
     { name: "Inventory", href: "/inventory", icon: Package, current: location === "/inventory" },
     { name: "Categories", href: "/categories", icon: FolderOpen, current: location === "/categories" },
     { name: "Price Checker", href: "/price-checker", icon: Calculator, current: location === "/price-checker" },
+    { name: "Sales", href: "/sales", icon: TrendingUp, current: location === "/sales" },
     { name: "Activity Logs", href: "/logs", icon: Activity, current: location === "/logs" },
     { name: "Settings", href: "/settings", icon: Settings, current: location === "/settings" },
   ];
 
-  const handleLogout = () => {
-    logout.mutate();
+  const handleLogout = async () => {
+    const result = await confirmAction.logout();
+    
+    if (result.isConfirmed) {
+      logout.mutate();
+    }
   };
 
   const closeMobile = () => setIsMobileOpen(false);

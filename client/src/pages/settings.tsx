@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
+import { confirmAction } from "@/lib/notifications";
 import { migrateLegacySettings } from "@/lib/settings";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLowStockThreshold } from "@/hooks/use-settings";
@@ -37,7 +38,13 @@ export default function Settings() {
     setLocalThreshold(lowStockThreshold.toString());
   }, [lowStockThreshold]);
 
-  const handleSaveSettings = () => {
+  const handleSaveSettings = async () => {
+    const result = await confirmAction.saveSettings();
+    
+    if (!result.isConfirmed) {
+      return;
+    }
+    
     try {
       // Save the low stock threshold
       setLowStockThreshold(parseInt(localThreshold));

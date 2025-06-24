@@ -338,6 +338,22 @@
   font-weight: 500 !important;
 }
 
+.swal-delete-btn {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  border: none !important;
+}
+
+.swal-success-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  border: none !important;
+}
+
+.dark .swal-cancel-btn {
+  background: rgba(0, 0, 0, 0.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #ccc !important;
+}
+
 /* Mobile responsive breakpoints */
 @media (max-width: 640px) {
   .store-btn-primary,

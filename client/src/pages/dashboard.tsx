@@ -305,11 +305,11 @@ export default function Dashboard() {
               </Button>
               <Button 
                 variant="outline"
-                onClick={() => setLocation('/logs')}
+                onClick={() => setLocation('/sales')}
                 className="flex items-center justify-center space-x-2 h-12"
               >
                 <BarChart3 size={18} />
-                <span>View Logs</span>
+                <span>View Sales</span>
               </Button>
             </div>
           </div>

@@ -17,6 +17,7 @@ import { useFirestoreInventory } from "@/hooks/use-firestore-realtime";
 import * as XLSX from 'xlsx';
 import type { Inventory } from "@/../../shared/schema";
 import { debugLog } from "@/lib/debug";
+import { confirmAction } from "@/lib/notifications";
 
 // Helper function to create a numeric hash from a string
 const hashCode = (str: string): number => {
@@ -648,7 +649,13 @@ export default function Inventory() {
                 </p>
                 <Button 
                   variant="destructive" 
-                  onClick={() => clearInventoryMutation.mutate()}
+                  onClick={async () => {
+                    const result = await confirmAction.clearAll('Inventory Items', processedInventory.length);
+                    
+                    if (result.isConfirmed) {
+                      clearInventoryMutation.mutate();
+                    }
+                  }}
                   disabled={clearInventoryMutation.isPending}
                 >
                   {clearInventoryMutation.isPending ? "Clearing..." : "Clear All Inventory"}

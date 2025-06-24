@@ -41,6 +41,20 @@ export interface ActivityLog {
   timestamp: any;
 }
 
+export interface DailySales {
+  id?: string;
+  date: string; // YYYY-MM-DD format
+  month: string; // e.g., "June-2025"
+  beginning: number; // Beginning inventory value
+  purchases: number; // Dedn-Purchase amount
+  ending: number; // End inventory value
+  saleInCash: number; // Sale in Cash (SUM(D4+C4-B4)) = End + Purchase - Beginning
+  profit: number; // Profit (E4*0.1)
+  remarks?: string; // Optional remarks
+  createdAt?: any;
+  updatedAt?: any;
+}
+
 // Inventory operations
 export const inventoryService = {
   async getAll(): Promise<InventoryItem[]> {
@@ -222,6 +236,166 @@ export const activityLogService = {
     });
     const doc = await getDoc(docRef);
     return { id: doc.id, ...doc.data() } as ActivityLog;
+  }
+};
+
+// Sales operations
+export const salesService = {
+  async getAll(): Promise<DailySales[]> {
+    const querySnapshot = await getDocs(
+      query(collection(db, 'sales'), orderBy('date', 'desc'))
+    );
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DailySales));
+  },
+
+  async getById(id: string): Promise<DailySales | null> {
+    const docSnap = await getDoc(doc(db, 'sales', id));
+    return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } as DailySales : null;
+  },
+
+  async getByMonth(month: string): Promise<DailySales[]> {
+    const querySnapshot = await getDocs(
+      query(
+        collection(db, 'sales'),
+        where('month', '==', month),
+        orderBy('date', 'desc')
+      )
+    );
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DailySales));
+  },
+
+  async getByDateRange(startDate: string, endDate: string): Promise<DailySales[]> {
+    const querySnapshot = await getDocs(
+      query(
+        collection(db, 'sales'),
+        where('date', '>=', startDate),
+        where('date', '<=', endDate),
+        orderBy('date', 'desc')
+      )
+    );
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DailySales));
+  },
+
+  async create(sales: Omit<DailySales, 'id'>): Promise<DailySales> {
+    try {
+      // Check if user is authenticated
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error('User not authenticated. Please login to add sales records.');
+      }
+      
+      console.log('Creating sales record with user:', user.uid, user.email);
+      
+      const docRef = await addDoc(collection(db, 'sales'), {
+        ...sales,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      
+      // Log the activity
+      await activityLogService.create({
+        userId: user.uid,
+        userEmail: user.email || undefined,
+        action: 'SALES_CREATE',
+        details: `Created sales record for ${sales.date} with sales amount ${sales.saleInCash}`
+      });
+      
+      const newDoc = await getDoc(docRef);
+      return { id: newDoc.id, ...newDoc.data() } as DailySales;
+    } catch (error) {
+      console.error('Error creating sales record:', error);
+      throw error;
+    }
+  },
+
+  async update(id: string, updates: Partial<DailySales>): Promise<DailySales> {
+    const docRef = doc(db, 'sales', id);
+    await updateDoc(docRef, {
+      ...updates,
+      updatedAt: serverTimestamp()
+    });
+    
+    // Log the activity
+    const user = auth.currentUser;
+    if (user) {
+      await activityLogService.create({
+        userId: user.uid,
+        userEmail: user.email || undefined,
+        action: 'SALES_UPDATE',
+        details: `Updated sales record for ${updates.date || 'unknown date'}`
+      });
+    }
+    
+    const updatedDoc = await getDoc(docRef);
+    return { id: updatedDoc.id, ...updatedDoc.data() } as DailySales;
+  },
+
+  async delete(id: string): Promise<void> {
+    const salesDoc = await getDoc(doc(db, 'sales', id));
+    const salesData = salesDoc.data() as DailySales;
+    
+    await deleteDoc(doc(db, 'sales', id));
+    
+    // Log the activity
+    const user = auth.currentUser;
+    if (user) {
+      await activityLogService.create({
+        userId: user.uid,
+        userEmail: user.email || undefined,
+        action: 'SALES_DELETE',
+        details: `Deleted sales record for ${salesData?.date || 'unknown date'}`
+      });
+    }
+  },
+
+  // Bulk operations for Excel import
+  async bulkCreate(salesRecords: Omit<DailySales, 'id'>[]): Promise<void> {
+    const batch = [];
+    for (const sales of salesRecords) {
+      const docRef = await addDoc(collection(db, 'sales'), {
+        ...sales,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      batch.push(docRef);
+    }
+    
+    // Log the bulk import activity
+    const user = auth.currentUser;
+    if (user) {
+      await activityLogService.create({
+        userId: user.uid,
+        userEmail: user.email || undefined,
+        action: 'SALES_BULK_IMPORT',
+        details: `Imported ${salesRecords.length} sales records`
+      });
+    }
+  },
+
+  // Get sales totals for analytics
+  async getSalesTotals(month?: string): Promise<{
+    totalSales: number;
+    totalProfit: number;
+    totalPurchases: number;
+    recordCount: number;
+  }> {
+    let querySnapshot;
+    if (month) {
+      querySnapshot = await getDocs(
+        query(collection(db, 'sales'), where('month', '==', month))
+      );
+    } else {
+      querySnapshot = await getDocs(collection(db, 'sales'));
+    }
+    
+    const sales = querySnapshot.docs.map(doc => doc.data() as DailySales);
+    
+    return sales.reduce((acc, sale) => ({
+      totalSales: acc.totalSales + (sale.saleInCash || 0),
+      totalProfit: acc.totalProfit + (sale.profit || 0),
+      totalPurchases: acc.totalPurchases + (sale.purchases || 0),
+      recordCount: acc.recordCount + 1
+    }), { totalSales: 0, totalProfit: 0, totalPurchases: 0, recordCount: 0 });
   }
 };
 
