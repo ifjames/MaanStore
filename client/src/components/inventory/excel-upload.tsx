@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 import { inventoryService, activityLogService } from '@/lib/firestore-service';
 import { useAuth } from '@/lib/auth';
 import * as XLSX from 'xlsx';
+import { debugLog } from '@/lib/debug';
 
 export function ExcelUploadComponent() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -31,7 +32,7 @@ export function ExcelUploadComponent() {
 
             if (!jsonData.length) throw new Error('Excel file is empty');
 
-            console.log('Raw Excel data:', jsonData.slice(0, 10)); // Show first 10 rows
+            debugLog('ExcelUpload', 'Raw Excel data:', jsonData.slice(0, 10)); // Show first 10 rows
             
             // Try to find the header row by looking for common patterns
             let headerRowIndex = -1;
@@ -43,7 +44,7 @@ export function ExcelUploadComponent() {
               if (!row) continue;
               
               const rowStr = row.map(cell => cell?.toString().toLowerCase().trim()).join(' ');
-              console.log(`Row ${i}:`, rowStr);
+              debugLog('ExcelUpload', `Row ${i}:`, rowStr);
               
               // Check if this row contains column headers
               if (rowStr.includes('item') || rowStr.includes('product') || rowStr.includes('name')) {
@@ -57,7 +58,7 @@ export function ExcelUploadComponent() {
             
             // If no proper header found, assume the file has data without headers
             if (headerRowIndex === -1) {
-              console.log('No header row found, assuming data starts from row 0');
+              debugLog('ExcelUpload', 'No header row found, assuming data starts from row 0');
               // Try to detect format by looking at first data row
               const firstDataRow = jsonData[0] as any[];
               if (firstDataRow && firstDataRow.length >= 2) {
@@ -105,8 +106,8 @@ export function ExcelUploadComponent() {
               }
             }
             
-            console.log('Found header row at index:', headerRowIndex);
-            console.log('Header row:', headerRow);
+            debugLog('ExcelUpload', 'Found header row at index:', headerRowIndex);
+            debugLog('ExcelUpload', 'Header row:', headerRow);
             
             const colIndex = {
               itemName: headerRow.findIndex((h: string) => h.includes('item name') || h.includes('item') || h.includes('product')),
@@ -115,7 +116,7 @@ export function ExcelUploadComponent() {
               stock: headerRow.findIndex((h: string) => h.includes('stock') || h.includes('quantity')),
             };
             
-            console.log('Column indexes:', colIndex);
+            debugLog('ExcelUpload', 'Column indexes:', colIndex);
             
             // Check if we found the required columns
             if (colIndex.itemName === -1) {
@@ -133,8 +134,8 @@ export function ExcelUploadComponent() {
             const existingItems = await inventoryService.getAll();
             const existingItemNames = new Set(existingItems.map(item => item.itemName.toLowerCase()));
             
-            console.log('Existing items count:', existingItems.length);
-            console.log('Existing item names:', Array.from(existingItemNames));
+            debugLog('ExcelUpload', 'Existing items count:', existingItems.length);
+            debugLog('ExcelUpload', 'Existing item names:', Array.from(existingItemNames));
 
             // Process data rows (skip header)
             let currentCategory = 'General';
@@ -149,7 +150,7 @@ export function ExcelUploadComponent() {
                 // Category headers are typically all caps or title case
                 if (potentialCategory.length > 3 && !potentialCategory.includes('₱')) {
                   currentCategory = potentialCategory;
-                  console.log(`Found category: ${currentCategory}`);
+                  debugLog('ExcelUpload', `Found category: ${currentCategory}`);
                   continue;
                 }
               }
@@ -159,16 +160,16 @@ export function ExcelUploadComponent() {
               const price = row[colIndex.price];
               const stock = row[colIndex.stock];
               
-              console.log(`Row ${i}:`, { itemName, category, price, stock });
+              debugLog('ExcelUpload', `Row ${i}:`, { itemName, category, price, stock });
               
               // Skip empty rows
               if (!itemName || itemName === '') {
-                console.log(`Skipping row ${i}: empty item name`);
+                debugLog('ExcelUpload', `Skipping row ${i}: empty item name`);
                 continue;
               }
               
               if (price === undefined || price === null || price === '') {
-                console.log(`Skipping row ${i}: empty price`);
+                debugLog('ExcelUpload', `Skipping row ${i}: empty price`);
                 continue;
               }
               
@@ -177,7 +178,7 @@ export function ExcelUploadComponent() {
               
               // Check for duplicates
               if (existingItemNames.has(itemName.toLowerCase())) {
-                console.log(`Skipping row ${i}: duplicate item "${itemName}"`);
+                debugLog('ExcelUpload', `Skipping row ${i}: duplicate item "${itemName}"`);
                 duplicatesSkipped++;
                 continue;
               }
@@ -189,7 +190,7 @@ export function ExcelUploadComponent() {
                 category,
               };
               
-              console.log(`Creating item:`, newItem);
+              debugLog('ExcelUpload', `Creating item:`, newItem);
               await inventoryService.create(newItem);
               existingItemNames.add(itemName.toLowerCase());
               itemCount++;

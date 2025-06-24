@@ -17,6 +17,8 @@ import Logs from "@/pages/logs";
 import Settings from "@/pages/settings";
 import NotFound from "@/pages/not-found";
 import Sidebar from "@/components/layout/sidebar";
+// Import debug utility to make debug functions available globally
+import "@/lib/debug";
 
 function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   return (

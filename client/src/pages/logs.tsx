@@ -1,10 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Activity, User, Clock, FileText } from "lucide-react";
+import { RefreshCw, Activity, User, Clock, FileText, Loader, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
+import { useFirestoreActivityLogs } from "@/hooks/use-firestore-realtime";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { activityLogService, type ActivityLog as FirestoreActivityLog } from "@/lib/firestore-service";
 
 interface ActivityLog {
@@ -73,22 +74,17 @@ const getActionLabel = (action: string) => {
 };
 
 export default function Logs() {
-  const { data: logs, isLoading, refetch } = useQuery({
-    queryKey: ["activity-logs"],
-    queryFn: async () => {
-      const firestoreLogs = await activityLogService.getAll();
-      // Convert to expected format
-      return firestoreLogs.map((log): ActivityLog => ({
-        id: parseInt(log.id || '0'),
-        userId: log.userId || 'unknown',
-        action: log.action,
-        details: log.details,
-        timestamp: log.timestamp ? new Date(log.timestamp.seconds * 1000).toISOString() : new Date().toISOString(),
-      }));
-    },
-    retry: false,
-    refetchInterval: 30000, // Refresh every 30 seconds
-  });
+  // Use Firestore real-time hook for auto-refreshing activity logs
+  const { logs: firestoreLogs, loading: isLoading, error } = useFirestoreActivityLogs(100);
+  
+  // Convert to expected format for display
+  const logs = firestoreLogs.map((log): ActivityLog => ({
+    id: parseInt(log.id || '0'),
+    userId: log.userId || 'unknown',
+    action: log.action,
+    details: log.details,
+    timestamp: log.timestamp ? log.timestamp.toISOString() : new Date().toISOString(),
+  }));
 
   return (
     <div className="flex-1 overflow-y-auto mobile-padding py-6">
@@ -106,16 +102,37 @@ export default function Logs() {
                 Track all system activities and user actions
               </p>
             </div>
-            <Button
-              onClick={() => refetch()}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <RefreshCw className="h-4 w-4" />
-              Refresh
-            </Button>
+            <div className="flex items-center gap-2">
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <Loader className="h-4 w-4 animate-spin" />
+                  <span className="text-sm text-muted-foreground">Updating in real-time...</span>
+                </div>
+              ) : (
+                <Badge variant="outline" className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-green-500"></span>
+                  <span className="text-xs">Real-time updates active</span>
+                </Badge>
+              )}
+            </div>
           </div>
         </motion.div>
+        
+        {/* Error display */}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mb-6"
+          >
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Error loading activity logs: {error}
+              </AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
 
         {/* Stats Card */}
         <motion.div

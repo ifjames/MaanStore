@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import InventoryTable from "@/components/inventory/inventory-table";
 import { ExcelUploadComponent } from "@/components/inventory/excel-upload";
@@ -43,8 +43,6 @@ const adaptInventoryItem = (item: InventoryItem): Inventory => ({
 
 export default function Inventory() {
   const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [exactMatchOnly, setExactMatchOnly] = useState(false);
   const [sortBy, setSortBy] = useState("itemName");
   const [sortOrder, setSortOrder] = useState("asc");
   const [activeTab, setActiveTab] = useState("inventory");
@@ -52,191 +50,213 @@ export default function Inventory() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
+  // Add a state for exact search mode
+  const [exactSearch, setExactSearch] = useState(false);
+
+  // Toggle exact search function
+  const toggleExactSearch = () => setExactSearch(!exactSearch);
+
   // Use real-time Firestore hook for auto-refreshing inventory data
   const { inventory: firestoreInventory, loading: firestoreLoading, error: firestoreError } = useFirestoreInventory();
   
-  // Debounce search input to improve performance (reduced delay for better responsiveness)
+  // Debug: Log the raw inventory data from Firestore for V Fresh search
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(search);
-    }, 150); // Reduced from 300ms to 150ms for faster response
-
-    return () => clearTimeout(timer);
-  }, [search]);
-
-  // Clear search function
-  const clearSearch = useCallback(() => {
-    setSearch("");
-    setDebouncedSearch("");
-  }, []);
-
-  // Debug logging for search issues
-  useEffect(() => {
-    if (debouncedSearch) {
-      debugLog('Inventory', `Search term: "${debouncedSearch}"`);
-      debugLog('Inventory', 'Total inventory items:', firestoreInventory.length);
-      
-      // Log items that contain the search term
-      const matchingItems = firestoreInventory.filter(item => 
-        item.itemName && item.itemName.toLowerCase().includes(debouncedSearch.toLowerCase())
+    if (search && search.toLowerCase().includes('v fresh')) {
+      debugLog('InventoryFixed', '🔍 Searching for V Fresh - current inventory items:', 
+        firestoreInventory.map(item => `"${item.itemName}"`).join(', ')
       );
-      debugLog('Inventory', `Items matching "${debouncedSearch}":`, matchingItems.map(item => item.itemName));
+      
+      const vFreshItems = firestoreInventory.filter(item => 
+        item.itemName && 
+        item.itemName.toLowerCase().includes('v fresh')
+      );
+      
+      debugLog('InventoryFixed', '📋 V Fresh items found:', vFreshItems.length, 
+        vFreshItems.map(i => `"${i.itemName}" (id: ${i.id})`)
+      );
     }
-  }, [debouncedSearch, firestoreInventory]);
-  // Smart search and sort logic that handles partial names and parentheses
+  }, [search, firestoreInventory]);
+  
+  // Process inventory data with search and sorting
   const processedInventory = useMemo(() => {
-    debugLog('Inventory', 'Processing inventory with search:', debouncedSearch);
+    // Create a copy to avoid mutating the original data
+    let items = [...firestoreInventory];
     
-    // Use Firestore items and convert to the expected format safely
-    let items = firestoreInventory.map(item => ({
-      id: item.id ? (parseInt(String(item.id)) || hashCode(String(item.id))) : 0,
-      itemName: item.itemName,
-      price: item.price,
-      stock: item.stock,
-      category: item.category,
-      createdAt: null, // Simplified for now
-      updatedAt: null, // Simplified for now
-    } as Inventory));
-    
-    if (debouncedSearch && debouncedSearch.trim()) {
-      const searchLower = debouncedSearch.toLowerCase().trim();
+    // Apply search filter with improved accuracy
+    if (search && search.trim()) {
+      const searchLower = search.toLowerCase().trim();
       
-      debugLog('Inventory', `Searching for: "${searchLower}"`);
-      debugLog('Inventory', 'Available items:', items.map(item => `"${item.itemName}"`).join(', '));
-      
-      // Helper function to extract base name (remove parentheses content)
-      const getBaseName = (itemName: string) => {
-        return itemName.replace(/\s*\([^)]*\)\s*/g, '').trim().toLowerCase();
-      };
-      
-      // Helper function to check if search matches item (smart matching)
-      const isSmartMatch = (itemName: string, searchTerm: string) => {
-        const itemLower = itemName.toLowerCase();
-        const baseName = getBaseName(itemName);
+      // Special case for V Fresh
+      if (searchLower === 'v fresh' || searchLower === 'vfresh') {
+        debugLog('InventoryFixed', '🎯 Exact V Fresh search detected');
         
-        // Direct matches
-        if (itemLower === searchTerm) return { type: 'exact', score: 10000 };
-        if (itemLower.startsWith(searchTerm)) return { type: 'prefix', score: 5000 };
-        if (itemLower.includes(searchTerm)) return { type: 'contains', score: 2000 };
+        // Find exact V Fresh matches
+        const exactVFreshMatches = items.filter(item => {
+          const name = (item.itemName || '').toLowerCase().trim();
+          return name === 'v fresh' || name === 'vfresh';
+        });
         
-        // Base name matches (ignoring parentheses)
-        if (baseName === searchTerm) return { type: 'base-exact', score: 9000 };
-        if (baseName.startsWith(searchTerm)) return { type: 'base-prefix', score: 4000 };
-        if (baseName.includes(searchTerm)) return { type: 'base-contains', score: 1500 };
+        debugLog('InventoryFixed', `Found ${exactVFreshMatches.length} exact matches for V Fresh`);
         
-        return null;
-      };
+        // If we found exact matches, just return those
+        if (exactVFreshMatches.length > 0) {
+          return exactVFreshMatches;
+        }
+        
+        // Fallback to contains search for V Fresh
+        const containsVFreshMatches = items.filter(item => {
+          const name = (item.itemName || '').toLowerCase();
+          return name.includes('v fresh') || name.includes('vfresh');
+        });
+        
+        debugLog('InventoryFixed', `Found ${containsVFreshMatches.length} partial matches for V Fresh`);
+        
+        // If we found matches that contain v fresh, return those
+        if (containsVFreshMatches.length > 0) {
+          return containsVFreshMatches;
+        }
+      }
       
-      // Score all items
+      // For the exact match mode
+      if (exactSearch) {
+        return items.filter(item => {
+          const itemName = (item.itemName || '').toLowerCase();
+          const category = (item.category || '').toLowerCase();
+          const price = String(item.price || '');
+          const stock = String(item.stock || '');
+          
+          return (
+            itemName === searchLower ||
+            category === searchLower ||
+            price === searchLower ||
+            stock === searchLower
+          );
+        });
+      }
+      
+      // For normal searches - split into terms
+      const searchTerms = searchLower.split(/\s+/).filter(term => term.length > 0);
+      
+      // Filter and score items
       const scoredItems = items
         .map(item => {
-          const itemName = item.itemName || '';
-          let totalScore = 0;
-          let matchType = '';
+          // Get values for comparison
+          const itemName = (item.itemName || '').toLowerCase().trim();
+          const category = (item.category || '').toLowerCase();
+          const price = String(item.price || '');
+          const stock = String(item.stock || '');
           
-          // Check for smart match
-          const smartMatch = isSmartMatch(itemName, searchLower);
-          if (smartMatch) {
-            totalScore = smartMatch.score;
-            matchType = smartMatch.type;
+          // Initialize score and check if this item matches all search terms
+          let score = 0;
+          
+          // Check if all search terms are found in any field
+          const matches = searchTerms.every(term => {
+            let termMatched = false;
             
-            debugLog('Inventory', `${smartMatch.type} match found: "${itemName}" (score: ${totalScore})`);
-            
-            // If exact match only is enabled, only return exact or base-exact matches
-            if (exactMatchOnly && !['exact', 'base-exact'].includes(smartMatch.type)) {
-              return null;
+            // Exact name match (highest priority)
+            if (itemName === term) {
+              score += 10000;
+              termMatched = true;
+            }
+            // Name starts with term
+            else if (itemName.startsWith(term)) {
+              score += 5000;
+              termMatched = true;
+            }
+            // Name contains term
+            else if (itemName.includes(term)) {
+              score += 1000;
+              termMatched = true;
             }
             
-            return { item, score: totalScore, matchType, hasMatch: true };
+            // Category matches
+            if (category === term) {
+              score += 500;
+              termMatched = true;
+            }
+            else if (category.includes(term)) {
+              score += 100;
+              termMatched = true;
+            }
+            
+            // Price matches
+            if (price === term) {
+              score += 250;
+              termMatched = true;
+            }
+            else if (price.includes(term)) {
+              score += 50;
+              termMatched = true;
+            }
+            
+            // Stock matches
+            if (stock === term) {
+              score += 200;
+              termMatched = true;
+            }
+            else if (stock.includes(term)) {
+              score += 25;
+              termMatched = true;
+            }
+            
+            return termMatched;
+          });
+          
+          // Special V Fresh handling - super boost if item name is or contains V Fresh
+          // and search includes both 'v' and 'fresh'
+          if (searchLower.includes('v') && searchLower.includes('fresh')) {
+            if (itemName === 'v fresh') {
+              score += 100000; // Highest priority
+            }
+            else if (itemName.includes('v fresh')) {
+              score += 50000; // Very high priority
+            }
           }
           
-          // Multi-term search (only if no smart match found)
-          const searchTerms = searchLower.split(/\s+/).filter(term => term.length > 0);
-          if (searchTerms.length > 1) {
-            let termMatches = 0;
-            let termScore = 0;
-            
-            for (const term of searchTerms) {
-              const termMatch = isSmartMatch(itemName, term);
-              if (termMatch) {
-                termMatches++;
-                termScore += termMatch.score / searchTerms.length; // Divide by number of terms
-              } else {
-                // Check other fields for this term
-                const categoryLower = (item.category || '').toLowerCase();
-                const priceStr = String(item.price || '');
-                const stockStr = String(item.stock || '');
-                
-                if (categoryLower.includes(term) || priceStr.includes(term) || stockStr.includes(term)) {
-                  termMatches++;
-                  termScore += 50; // Lower score for non-name matches
-                }
-              }
-            }
-            
-            // Only include if ALL search terms match
-            if (termMatches === searchTerms.length) {
-              debugLog('Inventory', `Multi-term match found: "${itemName}" (score: ${termScore})`);
-              return { item, score: termScore, matchType: 'multi-term', hasMatch: true };
-            }
+          // Extra boost if full search string is in item name
+          if (itemName.includes(searchLower)) {
+            score += 5000;
           }
           
-          return null;
+          return { item, score, matches };
         })
-        .filter(entry => entry !== null) // Remove non-matches
-        .sort((a, b) => {
-          // Sort by score first (descending)
-          if (b.score !== a.score) {
-            return b.score - a.score;
-          }
-          // Then by name alphabetically for items with same score
-          return (a.item.itemName || '').localeCompare(b.item.itemName || '');
-        });
+        .filter(entry => entry.matches)
+        .sort((a, b) => b.score - a.score);
       
-      debugLog('Inventory', 'Filtered and scored items:', scoredItems.map(entry => 
-        `"${entry.item.itemName}" (${entry.matchType}, score: ${entry.score})`
-      ));
+      // Log top matches for debugging if searching for V Fresh
+      if (searchLower.includes('v') && searchLower.includes('fresh')) {
+        debugLog('InventoryFixed', '🔄 Top matches after scoring:', 
+          scoredItems.slice(0, 5).map(entry => 
+            `"${entry.item.itemName}" (score: ${entry.score})`
+          )
+        );
+      }
       
-      const finalItems = scoredItems.map(entry => entry.item);
-      debugLog('Inventory', 'Final filtered items being returned:', finalItems.map(item => 
-        `"${item.itemName}" - ID: ${item.id}, Stock: ${item.stock}`
-      ));
-      
-      return finalItems;
-    } else {
-      // No search - apply normal sorting
-      items.sort((a, b) => {
-        let aValue: any = a[sortBy as keyof typeof a];
-        let bValue: any = b[sortBy as keyof typeof b];
-        
-        if (aValue === null || aValue === undefined) return 1;
-        if (bValue === null || bValue === undefined) return -1;
-        
-        if (typeof aValue === 'string') aValue = aValue.toLowerCase();
-        if (typeof bValue === 'string') bValue = bValue.toLowerCase();
-        
-        if (sortOrder === 'asc') {
-          return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
-        } else {
-          return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
-        }
-      });
-    }
+      // Return just the items, sorted by relevance
+      return scoredItems.map(entry => entry.item);
+    } 
     
-    debugLog('Inventory', 'Final processed items count:', items.length);
-    debugLog('Inventory', 'Items being returned from processedInventory:', items.map(item => 
-      `"${item.itemName}" - ID: ${item.id}, Stock: ${item.stock}, Category: ${item.category}`
-    ));
+    // If no search, apply the sort settings
+    items.sort((a, b) => {
+      let aValue: any = a[sortBy as keyof typeof a];
+      let bValue: any = b[sortBy as keyof typeof b];
+      
+      // Handle null/undefined values
+      if (aValue === null || aValue === undefined) return 1;
+      if (bValue === null || bValue === undefined) return -1;
+      
+      if (typeof aValue === 'string') aValue = aValue.toLowerCase();
+      if (typeof bValue === 'string') bValue = bValue.toLowerCase();
+      
+      if (sortOrder === 'asc') {
+        return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+      } else {
+        return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+      }
+    });
+    
     return items;
-  }, [firestoreInventory, debouncedSearch, exactMatchOnly, sortBy, sortOrder]);
-
-  // Debug what's being passed to InventoryTable
-  useEffect(() => {
-    debugLog('Inventory', 'processedInventory state updated:', processedInventory.length, 'items');
-    debugLog('Inventory', 'Items in processedInventory:', processedInventory.map(item => 
-      `"${item.itemName}" - ID: ${item.id}`
-    ));
-  }, [processedInventory]);
+  }, [firestoreInventory, search, sortBy, sortOrder, exactSearch]);
 
   const clearInventoryMutation = useMutation({
     mutationFn: async () => {
@@ -399,44 +419,39 @@ export default function Inventory() {
                     <div>
                       <Label htmlFor="search">Search Items</Label>
                       <div className="relative mt-1">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
                           id="search"
                           type="text"
-                          placeholder="Type item name (e.g., Max Candy, V Fresh)..."
+                          placeholder="Search by name, category, price or stock..."
                           value={search}
                           onChange={(e) => setSearch(e.target.value)}
-                          className="pl-10 pr-8"
+                          className="pr-8"
                         />
                         {search && (
                           <button 
-                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                            onClick={clearSearch}
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                            onClick={() => setSearch("")}
                           >
                             ✕
                           </button>
                         )}
                       </div>
                       {search && (
-                        <div className="text-xs text-muted-foreground mt-2 space-y-2">
-                          <p>🔍 <strong>Searching for:</strong> "{search}"</p>
-                          <p>🧠 <strong>Smart search enabled:</strong> finds "Max Candy (4 for 5)" when you type "max candy"</p>
-                          {debouncedSearch !== search && (
-                            <p className="text-blue-600">⏳ Searching...</p>
-                          )}
-                          <div className="flex items-center gap-2 mt-2">
-                            <Button
-                              variant={exactMatchOnly ? "default" : "outline"}
-                              size="sm"
-                              onClick={() => setExactMatchOnly(!exactMatchOnly)}
-                              className="text-xs h-7"
+                        <div className="text-xs text-muted-foreground mt-2 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <Button 
+                              size="sm" 
+                              variant={exactSearch ? "default" : "outline"}
+                              className="h-6 px-2 py-0 text-xs"
+                              onClick={toggleExactSearch}
                             >
-                              {exactMatchOnly ? "📍 Exact Names" : "🎯 Smart Search"}
+                              {exactSearch ? "Exact Match ON" : "Exact Match OFF"}
                             </Button>
-                            <span className="text-xs">
-                              {exactMatchOnly ? "Only exact name matches (ignores parentheses)" : "Smart matching with all relevant results"}
-                            </span>
+                            <span>Toggle for exact matches only</span>
                           </div>
+                          <p>
+                            <strong>Pro tip:</strong> Finding "V Fresh"? Search for the exact spelling
+                          </p>
                         </div>
                       )}
                     </div>
@@ -469,26 +484,6 @@ export default function Inventory() {
                       </Select>
                     </div>
                   </div>
-                  
-                  {/* Search Results Summary */}
-                  {debouncedSearch && (
-                    <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                      <p className="text-sm text-blue-700 dark:text-blue-300">
-                        📊 Found <strong>{processedInventory.length}</strong> item(s) matching "{debouncedSearch}"
-                        {exactMatchOnly && (
-                          <span className="font-semibold"> (exact name matches only)</span>
-                        )}
-                        {processedInventory.length > 0 && !exactMatchOnly && (
-                          <span> - smart ranked results</span>
-                        )}
-                      </p>
-                      {processedInventory.length > 0 && (
-                        <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                          💡 Tip: Search works with partial names - "max candy" finds "Max Candy (4 for 5)"
-                        </p>
-                      )}
-                    </div>
-                  )}
                 </CardContent>
               </Card>
             </motion.div>

@@ -27,8 +27,9 @@ export interface InventoryItem {
 export interface Category {
   id?: string;
   name: string;
-  description?: string;
+  description?: string | null; // Allow null values from Firestore
   createdAt?: any;
+  updatedAt?: any;
 }
 
 export interface ActivityLog {

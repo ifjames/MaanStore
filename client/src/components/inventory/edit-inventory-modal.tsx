@@ -10,6 +10,7 @@ import { showNotification } from '@/lib/notifications';
 import { inventoryService, categoryService, activityLogService, type Category as FirestoreCategory } from '@/lib/firestore-service';
 import { useAuth } from '@/lib/auth';
 import type { Inventory } from '@/../../shared/schema';
+import { debugLog } from '@/lib/debug';
 
 interface EditInventoryModalProps {
   item: Inventory | null;
@@ -86,7 +87,7 @@ export function EditInventoryModal({ item, open, onOpenChange }: EditInventoryMo
         throw new Error(`Item "${item.itemName}" not found in database`);
       }
 
-      console.log('Updating item with Firestore ID:', firestoreItem.id);
+      debugLog('EditInventoryModal', 'Updating item with Firestore ID:', firestoreItem.id);
 
       let finalPrice = data.price;
       let finalItemName = data.itemName;

@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Package, AlertTriangle, CheckCircle, Edit, Trash2 } from "lucide-react";
 import { formatCurrency } from "@/lib/notifications";
-import { motion } from "framer-motion";
 import { EditInventoryModal } from "./edit-inventory-modal";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { showNotification } from "@/lib/notifications";
@@ -12,6 +11,7 @@ import { inventoryService, activityLogService } from "@/lib/firestore-service";
 import { useAuth } from "@/lib/auth";
 import type { Inventory } from "@/../../shared/schema";
 import { useLowStockThreshold } from "@/hooks/use-settings";
+import { debugLog } from "@/lib/debug";
 
 interface InventoryTableProps {
   inventory: Inventory[];
@@ -23,6 +23,16 @@ export default function InventoryTable({ inventory, isLoading }: InventoryTableP
   const [editModalOpen, setEditModalOpen] = useState(false);
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  
+  // Debug logging for InventoryTable
+  debugLog('InventoryTable', '🔍 InventoryTable render - received:', inventory.length, 'items');
+  debugLog('InventoryTable', '🔍 InventoryTable items details:', inventory.map((item, idx) => 
+    `[${idx}] "${item.itemName}" - ID: ${item.id}, Stock: ${item.stock}, Price: ${item.price}`
+  ));
+  
+  if (inventory.length > 0) {
+    debugLog('InventoryTable', '🔍 First item in InventoryTable:', inventory[0]);
+  }
   
   // Get user's low stock threshold reactively
   const { lowStockThreshold } = useLowStockThreshold();
@@ -88,14 +98,14 @@ export default function InventoryTable({ inventory, isLoading }: InventoryTableP
 
   if (isLoading) {
     return (
-      <Card className="shadow-lg">
+      <Card className="shadow-lg bg-card dark:bg-card border border-border">
         <CardContent className="p-0">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Current Inventory</h3>
+          <div className="px-6 py-4 border-b border-border bg-muted/30 dark:bg-muted/20">
+            <h3 className="text-lg font-medium text-foreground">Current Inventory</h3>
           </div>
-          <div className="p-8 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#4CAF50] mx-auto mb-4"></div>
-            <p className="text-gray-500">Loading inventory...</p>
+          <div className="p-8 text-center bg-background dark:bg-background">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading inventory...</p>
           </div>
         </CardContent>
       </Card>
@@ -103,20 +113,20 @@ export default function InventoryTable({ inventory, isLoading }: InventoryTableP
   }
 
   return (
-    <Card className="shadow-lg">
+    <Card className="shadow-lg bg-card dark:bg-card border border-border">
       <CardContent className="p-0">
-        <div className="px-6 py-4 border-b border-border">
+        <div className="px-6 py-4 border-b border-border bg-muted/30 dark:bg-muted/20">
           <h3 className="text-lg font-medium text-foreground">Current Inventory</h3>
         </div>
         <div className="overflow-x-auto">
           {inventory.length === 0 ? (
-            <div className="p-8 text-center">
+            <div className="p-8 text-center bg-background dark:bg-background">
               <Package size={48} className="mx-auto mb-4 text-muted-foreground" />
               <p className="text-muted-foreground">No inventory items found</p>
             </div>
           ) : (
             <table className="min-w-full divide-y divide-border">
-              <thead className="bg-muted/50">
+              <thead className="bg-muted/30 dark:bg-muted/20">
                 <tr>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Item Name
@@ -138,31 +148,30 @@ export default function InventoryTable({ inventory, isLoading }: InventoryTableP
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-background divide-y divide-border">
+              <tbody className="bg-background dark:bg-background divide-y divide-border">
                 {inventory.map((item, index) => {
+                  debugLog('InventoryTable', `🔍 Rendering table row ${index + 1}/${inventory.length} for: "${item.itemName}" (ID: ${item.id})`);
+                  
                   const status = getStockStatus(item.stock);
                   const StatusIcon = status.icon;
                   
                   return (
-                    <motion.tr 
-                      key={item.id} 
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="hover:bg-muted/50 transition-colors"
+                    <tr 
+                      key={`${item.id}-${item.itemName}`}
+                      className="hover:bg-muted/30 dark:hover:bg-muted/20 transition-colors border-b border-border"
                     >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground dark:text-foreground">
                         {item.itemName}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground dark:text-muted-foreground">
                         <Badge variant="outline" className="text-xs">
                           {item.category || 'General'}
                         </Badge>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground dark:text-foreground">
                         {formatCurrency(item.price, localStorage.getItem('currency') || 'PHP')}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground dark:text-foreground">
                         {item.stock}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -192,7 +201,7 @@ export default function InventoryTable({ inventory, isLoading }: InventoryTableP
                           </Button>
                         </div>
                       </td>
-                    </motion.tr>
+                    </tr>
                   );
                 })}
               </tbody>

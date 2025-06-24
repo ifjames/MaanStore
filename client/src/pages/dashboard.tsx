@@ -1,100 +1,43 @@
-import { useQuery } from "@tanstack/react-query";
 import StatsCard from "@/components/dashboard/stats-card";
 import LowStockAlert from "@/components/dashboard/low-stock-alert";
 import { Button } from "@/components/ui/button";
-import { Package, Warehouse, AlertTriangle, DollarSign, BarChart3, Clock } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query";
+import { Package, Warehouse, AlertTriangle, DollarSign, BarChart3, Clock, AlertCircle, Loader } from "lucide-react";
 import { formatCompactNumber, formatCurrency } from "@/lib/format";
-import { inventoryService, activityLogService } from "@/lib/firestore-service";
+import { activityLogService } from "@/lib/firestore-service";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { useLowStockThreshold } from "@/hooks/use-settings";
+import { useFirestoreLowStock, useFirestoreInventoryStats, useFirestoreActivityLogs } from "@/hooks/use-firestore-realtime";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function Dashboard() {
-  const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
 
   // Get user's low stock threshold reactively
   const { lowStockThreshold } = useLowStockThreshold();
 
-  // Fetch inventory stats
-  const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ["inventory-stats", lowStockThreshold],
-    queryFn: async () => {
-      try {
-        const inventory = await inventoryService.getAll();
-        const lowStockItems = await inventoryService.getLowStock(lowStockThreshold);
-        
-        console.log('Dashboard - inventory items:', inventory.length);
-        console.log('Dashboard - using threshold:', lowStockThreshold);
-        if (inventory.length > 0) {
-          console.log('Sample item:', {
-            itemName: inventory[0].itemName,
-            price: inventory[0].price,
-            stock: inventory[0].stock,
-            priceType: typeof inventory[0].price,
-            stockType: typeof inventory[0].stock
-          });
-        }
-        
-        const totalStock = inventory.reduce((sum, item) => {
-          const stock = Number(item.stock) || 0;
-          return sum + stock;
-        }, 0);
-        
-        const totalValue = inventory.reduce((sum, item) => {
-          const price = parseFloat(String(item.price)) || 0;
-          const stock = Number(item.stock) || 0;
-          return sum + (price * stock);
-        }, 0);
-        
-        const result = {
-          totalItems: inventory.length,
-          totalStock,
-          lowStockCount: lowStockItems.length,
-          totalValue,
-        };
-        
-        console.log('Dashboard stats result:', result);
-        return result;
-      } catch (error) {
-        console.error('Error calculating dashboard stats:', error);
-        return {
-          totalItems: 0,
-          totalStock: 0,
-          lowStockCount: 0,
-          totalValue: 0,
-        };
-      }
-    },
-    staleTime: 30000, // Cache for 30 seconds
-    refetchInterval: 60000, // Refetch every minute
-  });
-
-  // Fetch low stock items for display (limit to 6 for dashboard)
-  const { data: lowStockItems, isLoading: lowStockLoading } = useQuery({
-    queryKey: ["low-stock-items", lowStockThreshold],
-    queryFn: async () => {
-      const lowStockItems = await inventoryService.getLowStock(lowStockThreshold);
-      return lowStockItems.slice(0, 6); // Only show first 6 items on dashboard
-    },
-    staleTime: 30000,
-    refetchInterval: 60000,
-  });
-
-  // Fetch recent activity logs (limit to 5 for dashboard)
-  const { data: recentActivity, isLoading: activityLoading } = useQuery({
-    queryKey: ["recent-activity"],
-    queryFn: async () => {
-      const logs = await activityLogService.getAll();
-      return logs.slice(0, 5); // Only show first 5 recent activities
-    },
-    staleTime: 30000,
-    refetchInterval: 120000, // Refetch every 2 minutes for activity logs
-  });
+  // Use Firestore real-time hooks for auto-refreshing data
+  const { stats, loading: statsLoading, error: statsError } = useFirestoreInventoryStats();
+  
+  // Custom hook to get low stock items with user threshold
+  const { 
+    lowStockItems, 
+    loading: lowStockLoading, 
+    error: lowStockError 
+  } = useFirestoreLowStock(lowStockThreshold);
+  
+  // Get recent activity logs
+  const { 
+    logs: recentActivity, 
+    loading: activityLoading, 
+    error: activityError 
+  } = useFirestoreActivityLogs(5); // Limit to 5 for dashboard
 
   const isLoading = statsLoading || lowStockLoading || activityLoading;
+  
+  // Combine all errors for display
+  const errors = [statsError, lowStockError, activityError].filter(Boolean);
 
   // Remove Google Sheets sync and export mutations - replaced with Excel upload
   // const syncMutation = ... (removed)
@@ -131,7 +74,35 @@ export default function Dashboard() {
           <p className="mt-1 text-muted-foreground mobile-text">Monitor your store's inventory and performance</p>
         </motion.div>
 
-        {/* Real-time Status - Removed as we now use Firestore */}
+        {/* Error display */}
+        {errors.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mb-6"
+          >
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Error loading dashboard data: {errors.join('. ')}
+              </AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
+
+        {/* Loading indicator */}
+        {isLoading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex justify-center my-8"
+          >
+            <div className="flex items-center gap-2">
+              <Loader className="h-5 w-5 animate-spin" />
+              <span>Loading real-time data...</span>
+            </div>
+          </motion.div>
+        )}
 
         {/* Summary Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-8">

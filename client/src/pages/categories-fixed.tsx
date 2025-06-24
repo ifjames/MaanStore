@@ -27,17 +27,15 @@ export default function Categories() {
   const { toast } = useToast();
   const { user } = useAuth();
 
-  // Filter and sort categories based on search relevance
+  // Filter categories based on search input
   const filteredCategories = useMemo(() => {
     if (!search.trim()) {
       return categories;
     }
 
     const searchTerms = search.toLowerCase().split(/\s+/).filter(term => term.length > 0);
-    const fullSearchLower = search.toLowerCase();
     
-    // First filter categories that match all search terms
-    const matches = categories.filter(category => {
+    return categories.filter(category => {
       return searchTerms.every(term => {
         const nameMatch = category.name?.toLowerCase().includes(term);
         const descMatch = category.description?.toString().toLowerCase().includes(term);
@@ -46,43 +44,6 @@ export default function Categories() {
         return nameMatch || descMatch || idMatch;
       });
     });
-    
-    // Then calculate relevance score for sorting
-    const scoredCategories = matches.map(category => {
-      let score = 0;
-      const nameLower = category.name?.toLowerCase() || '';
-      const descLower = category.description?.toString().toLowerCase() || '';
-      const idStr = String(category.id);
-      
-      // Give higher scores for better matches
-      if (nameLower === fullSearchLower) {
-        score += 10000; // Exact full name match (highest priority)
-      } else if (nameLower.startsWith(fullSearchLower)) {
-        score += 5000; // Name starts with full search
-      } else if (nameLower.includes(fullSearchLower)) {
-        score += 1000; // Name contains full search
-      }
-      
-      // Score individual term matches
-      searchTerms.forEach(term => {
-        if (nameLower === term) score += 500;
-        else if (nameLower.startsWith(term)) score += 200;
-        else if (nameLower.includes(term)) score += 100;
-        
-        if (descLower === term) score += 50;
-        else if (descLower.includes(term)) score += 20;
-        
-        if (idStr === term) score += 50;
-        else if (idStr.includes(term)) score += 10;
-      });
-      
-      return { category, score };
-    });
-    
-    // Sort by score (highest first) and return just the categories
-    return scoredCategories
-      .sort((a, b) => b.score - a.score)
-      .map(item => item.category);
   }, [categories, search]);
 
   // Show error toast if there's an error from the hook
@@ -355,25 +316,18 @@ export default function Categories() {
         </Alert>
 
         {/* Search Input */}
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-3 p-4 border rounded-lg">
-            <Search className="h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search categories by name, description or ID"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="flex-1 border-0 focus-visible:ring-0 p-0 shadow-none h-8"
-            />
-            {search && (
-              <Button variant="ghost" size="sm" onClick={() => setSearch("")}>
-                Clear
-              </Button>
-            )}
-          </div>
+        <div className="flex items-center gap-3 p-4 border rounded-lg">
+          <Search className="h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search categories by name, description or ID"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="flex-1 border-0 focus-visible:ring-0 p-0 shadow-none h-8"
+          />
           {search && (
-            <p className="text-xs text-muted-foreground mt-1 px-1">
-              Results are ranked by relevance, with exact name matches shown first
-            </p>
+            <Button variant="ghost" size="sm" onClick={() => setSearch("")}>
+              Clear
+            </Button>
           )}
         </div>
 

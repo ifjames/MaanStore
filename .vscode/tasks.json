@@ -1,0 +1,13 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run MaanStore Dev Server",
+			"type": "shell",
+			"command": "cd /workspaces/MaanStore && npm run dev",
+			"isBackground": true,
+			"group": "development",
+			"problemMatcher": []
+		}
+	]
+}
